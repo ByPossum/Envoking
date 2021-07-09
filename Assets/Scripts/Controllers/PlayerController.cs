@@ -41,11 +41,19 @@ public class PlayerController : Controller
 
     private void LateUpdate()
     {
-        transform.rotation = Quaternion.AngleAxis(-Mathf.Atan2((cam.ScreenToWorldPoint(bi_input.Look) - transform.position).y, (cam.ScreenToWorldPoint(bi_input.Look) - transform.position).x) * Mathf.Rad2Deg, Vector3.up);
-        //transform.LookAt(cam.transform.InverseTransformPoint(bi_input.Look));
+        // Mouse based rotation
+        RaycastHit hit;
+        Physics.Raycast(cam.ScreenPointToRay(bi_input.Look), out hit);
+        Vector3 lookPoint = hit.point;
+        lookPoint.y = 0.0f;
+        transform.rotation = Quaternion.LookRotation(lookPoint - Vector3.Scale(transform.position, Vector3.one - Vector3.up));
+
+        // Movement
         rb.AddForce((bi_input.Movement.normalized * Time.deltaTime) * f_movementSpeed, ForceMode.Impulse);
         rb.velocity = (bi_input.Movement != Vector3.zero ? Vector3.ClampMagnitude(rb.velocity, 10f) : Vector3.zero + Physics.gravity);
-        if (Vector3.Distance(rb.velocity, Vector3.zero) < 0f && CheckExclusiveActions())
+
+        // Action Checking
+        if (rb.velocity.x != 0.0f || rb.velocity.z != 0.0f && CheckExclusiveActions())
             pa_currentAction = PlayerAction.walking;
         else if(CheckExclusiveActions())
             pa_currentAction = PlayerAction.idle;
