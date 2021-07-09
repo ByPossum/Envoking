@@ -5,11 +5,6 @@ using UnityEngine;
 
 public class PlayerInput : BaseInput
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
 
     // Update is called once per frame
     void Update()
@@ -23,5 +18,6 @@ public class PlayerInput : BaseInput
         v_action.x = Input.GetAxis("Fire1");
         v_action.y = Input.GetAxis("Fire2");
         v_action.z = Input.GetAxis("Fire3");
+        f_special = Input.GetAxis("Submit");
     }
 }

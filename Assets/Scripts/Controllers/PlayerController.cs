@@ -8,9 +8,18 @@ public class PlayerController : Controller
 {
     private Rigidbody rb;
     private Collider col;
+    private bool b_canPickup = true;
     private bool b_canFire = true;
+    private GameObject go_heldObject;
+    private PlayerAction pa_currentAction = PlayerAction.none;
     [SerializeField] private float f_movementSpeed;
+    [SerializeField] private float f_rotateSpeed;
+    [SerializeField] private float f_shotSpeed;
+    [SerializeField] private float f_throwForce;
+    [SerializeField] private Transform v_pickupTransform;
+    [SerializeField] private GameObject go_bullet;
     [SerializeField] private Camera cam;
+    [SerializeField] private LayerMask lm_pickupLayers;
     // Start is called before the first frame update
     void Start()
     {
@@ -22,25 +31,104 @@ public class PlayerController : Controller
     // Update is called once per frame
     void Update()
     {
-        if (b_canFire && bi_input.Actions.x > 0)
+        if (bi_input.Actions.x > 0 && CheckExclusiveActions() && b_canFire)
             FireBullet();
-        if (bi_input.Actions.y > 0)
+        if (bi_input.Actions.y > 0 && b_canPickup)
             Pickup();
+        if (bi_input.Special > 0 && CheckExclusiveActions())
+            StrokeDog();
     }
 
     private void LateUpdate()
     {
+        transform.rotation = Quaternion.AngleAxis(-Mathf.Atan2((cam.ScreenToWorldPoint(bi_input.Look) - transform.position).y, (cam.ScreenToWorldPoint(bi_input.Look) - transform.position).x) * Mathf.Rad2Deg, Vector3.up);
         //transform.LookAt(cam.transform.InverseTransformPoint(bi_input.Look));
         rb.AddForce((bi_input.Movement.normalized * Time.deltaTime) * f_movementSpeed, ForceMode.Impulse);
         rb.velocity = (bi_input.Movement != Vector3.zero ? Vector3.ClampMagnitude(rb.velocity, 10f) : Vector3.zero + Physics.gravity);
+        if (Vector3.Distance(rb.velocity, Vector3.zero) < 0f && CheckExclusiveActions())
+            pa_currentAction = PlayerAction.walking;
+        else if(CheckExclusiveActions())
+            pa_currentAction = PlayerAction.idle;
     }
 
     private void FireBullet()
     {
-        Debug.Log("I'm firing!");
+        GameObject bull = Instantiate(go_bullet, transform.position + (transform.forward), Quaternion.identity);
+        bull.GetComponent<Rigidbody>().AddForce(transform.forward * 20f, ForceMode.Impulse);
+        b_canFire = false;
+        StartCoroutine(FireCooldown());
     }
     private void Pickup()
     {
-        Debug.Log("Picking Up");
+        switch (pa_currentAction)
+        {
+            case PlayerAction.holding:
+                if(go_heldObject != null)
+                {
+                    go_heldObject.transform.parent = null;
+                    go_heldObject.GetComponent<Collider>().isTrigger = false;
+                    Rigidbody heldObjRb = go_heldObject.GetComponent<Rigidbody>();
+                    heldObjRb.isKinematic = false;
+                    heldObjRb.AddForce(transform.forward * f_throwForce, ForceMode.Impulse);
+                }
+                pa_currentAction = PlayerAction.idle;
+                break;
+            default:
+                RaycastHit hit;
+                if (Physics.Raycast(transform.position, transform.forward, out hit, 1f, lm_pickupLayers))
+                {
+                    if (hit.transform.GetComponent<IPickupable>() != null)
+                    {
+                        hit.transform.position = v_pickupTransform.position;
+                        go_heldObject = hit.transform.gameObject;
+                        go_heldObject.GetComponent<Rigidbody>().isKinematic = true;
+                        go_heldObject.GetComponent<Collider>().isTrigger = true;
+                        go_heldObject.transform.parent = transform;
+                    }
+                }
+                pa_currentAction = PlayerAction.holding;
+                break;
+        }
+        b_canPickup = false;
+        StartCoroutine(PickupCooldown());
     }
+
+    private void StrokeDog()
+    {
+
+    }
+
+    private bool CheckExclusiveActions()
+    {
+        switch (pa_currentAction)
+        {
+            case PlayerAction.holding:
+                return false;
+            case PlayerAction.stroking:
+                return false;
+            default:
+                return true;
+        }
+    }
+
+    private IEnumerator FireCooldown()
+    {
+        yield return new WaitForSeconds(f_shotSpeed);
+        b_canFire = true;
+    }
+    private IEnumerator PickupCooldown()
+    {
+        yield return new WaitForSeconds(f_shotSpeed);
+        b_canPickup = true;
+    }
+}
+
+public enum PlayerAction
+{
+    none,
+    idle,
+    walking,
+    shooting,
+    holding,
+    stroking
 }
