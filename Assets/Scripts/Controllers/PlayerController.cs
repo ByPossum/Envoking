@@ -12,6 +12,7 @@ public class PlayerController : Controller
     private bool b_canFire = true;
     private GameObject go_heldObject;
     private PlayerAction pa_currentAction = PlayerAction.none;
+
     [SerializeField] private float f_movementSpeed;
     [SerializeField] private float f_rotateSpeed;
     [SerializeField] private float f_shotSpeed;
@@ -20,6 +21,9 @@ public class PlayerController : Controller
     [SerializeField] private GameObject go_bullet;
     [SerializeField] private Camera cam;
     [SerializeField] private LayerMask lm_pickupLayers;
+
+    public PlayerAction CurrentAction { get { return pa_currentAction; } }
+
     // Start is called before the first frame update
     void Start()
     {
