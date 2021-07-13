@@ -1,16 +1,31 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 
-public class Dog : Creature
+public class Dog : Creature, IPickupable
 {
     private DogActions da_currentAction = DogActions.none;
     public DogActions CurrentAction { get { return da_currentAction; } }
+    [SerializeField] private LayerMask lm_throwChecker;
     // Update is called once per frame
     void Update()
     {
-        CheckActionToPerform();
+        if(!b_incapacitated)
+            CheckActionToPerform();
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        Debug.Log(collision.transform.name);
+        if (b_incapacitated)
+        {
+            if(collision.transform.gameObject.layer == lm_throwChecker.value)
+            {
+                b_incapacitated = false;
+            }
+        }
     }
 
     public override void Attack()
@@ -47,10 +62,10 @@ public class Dog : Creature
     private bool FindPlayer()
     {
         // TODO: Add a distance to make it feel more natural
-        nma_self.destination = FindObjectOfType<PlayerController>().transform.position;
-        if (nma_self.hasPath)
+        nmp_checkingPath = new NavMeshPath();
+        if (NavMesh.CalculatePath(transform.position, FindObjectOfType<PlayerController>().transform.position, -1, nmp_checkingPath))
         {
-            v_movement = nma_self.destination;
+            nmp_followingPath = nmp_checkingPath;
             return true;
         }
         return false;
@@ -61,14 +76,13 @@ public class Dog : Creature
         List<Vector3> allGoblinPos = new List<Vector3>();
         (float dist, int index) smallestValueIndex = (100f, 0);
         int iter = 0;
-
+        nmp_checkingPath = new NavMeshPath();
         // Collect all active goblin positions
         foreach(Goblin gob in FindObjectsOfType<Goblin>())
         {
             if (!gob.enabled)
                 continue;
-            nma_self.destination = gob.transform.position;
-            if (nma_self.hasPath)
+            if (NavMesh.CalculatePath(transform.position, gob.transform.position, -1, nmp_checkingPath))
                 allGoblinPos.Add(gob.transform.position);
         }
         // If there are no available goblins, action cannot be completed
@@ -81,15 +95,18 @@ public class Dog : Creature
                 smallestValueIndex = (Vector3.Distance(transform.position, goblinPos), iter);
             iter++;
         }
-        nma_self.destination = allGoblinPos[smallestValueIndex.index];
-        v_movement = nma_self.destination;
-        return true;
+        if(nmp_checkingPath.status == NavMeshPathStatus.PathComplete)
+        {
+            nmp_followingPath = nmp_checkingPath;
+            return true;
+        }
+        return false;
     }
 
     private bool AbleToAttack()
     {
-        if (Vector3.Distance(nma_self.destination, transform.position) < 1f)
-            return true;
+        //if (Vector3.Distance(nma_self.destination, transform.position) < 1f)
+        //    return true;
         return false;
     }
 
@@ -101,6 +118,17 @@ public class Dog : Creature
     public IEnumerator AttackHitbox()
     {
         yield return new WaitForSeconds(0.5f);
+    }
+
+    public void Pickup()
+    {
+        da_currentAction = DogActions.pickedUp;
+        b_incapacitated = true;
+    }
+
+    public void Throw()
+    {
+        da_currentAction = DogActions.none;
     }
 }
 

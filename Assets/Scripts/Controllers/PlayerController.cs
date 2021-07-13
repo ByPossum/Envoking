@@ -43,7 +43,7 @@ public class PlayerController : Controller
             StrokeDog();
     }
 
-    private void LateUpdate()
+    private void FixedUpdate()
     {
         // Mouse based rotation
         RaycastHit hit;
@@ -82,15 +82,19 @@ public class PlayerController : Controller
                     Rigidbody heldObjRb = go_heldObject.GetComponent<Rigidbody>();
                     heldObjRb.isKinematic = false;
                     heldObjRb.AddForce(transform.forward * f_throwForce, ForceMode.Impulse);
+                    go_heldObject.GetComponent<IPickupable>().Throw();
+                    go_heldObject = null;
                 }
                 pa_currentAction = PlayerAction.idle;
                 break;
             default:
                 RaycastHit hit;
-                if (Physics.Raycast(transform.position, transform.forward, out hit, 1f, lm_pickupLayers))
+                if (Physics.SphereCast(transform.position, 1f, transform.forward, out hit, 1f, lm_pickupLayers))
                 {
+                    Debug.Log(hit.transform.name);
                     if (hit.transform.GetComponent<IPickupable>() != null)
                     {
+                        hit.transform.GetComponent<IPickupable>().Pickup();
                         hit.transform.position = v_pickupTransform.position;
                         go_heldObject = hit.transform.gameObject;
                         go_heldObject.GetComponent<Rigidbody>().isKinematic = true;

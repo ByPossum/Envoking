@@ -4,14 +4,12 @@ using UnityEngine;
 
 public class Barrel : MonoBehaviour, IPickupable
 {
-    // Start is called before the first frame update
-    void Start()
+    public void Pickup()
     {
         
     }
 
-    // Update is called once per frame
-    void Update()
+    public void Throw()
     {
         
     }

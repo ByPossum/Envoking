@@ -4,14 +4,17 @@ using UnityEngine;
 using UnityEngine.AI;
 public class Creature : BaseInput
 {
-    protected NavMeshAgent nma_self;
+    protected NavMeshPath nmp_checkingPath;
+    protected NavMeshPath nmp_followingPath;
     protected Rigidbody rb;
     private bool b_canAttack = false;
     public bool CanAttack { get { return b_canAttack; } }
+    public NavMeshPath FollowingPath { get { return nmp_followingPath; } }
+    protected bool b_incapacitated = false;
+    public bool Incapacitated { get { return b_incapacitated; } }
     // Start is called before the first frame update
     protected void Start()
     {
-        nma_self = GetComponent<NavMeshAgent>();
         rb = GetComponent<Rigidbody>();
     }
 

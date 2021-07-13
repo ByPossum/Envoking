@@ -5,6 +5,11 @@ using UnityEngine;
 public class Bullet : MonoBehaviour
 {
     [SerializeField] private float f_damage;
+
+    private void Start()
+    {
+        Destroy(gameObject, 1f);
+    }
     private void OnCollisionEnter(Collision collision)
     {
         if (collision.transform.GetComponent<Goblin>())
