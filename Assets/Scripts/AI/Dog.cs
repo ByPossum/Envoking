@@ -18,11 +18,11 @@ public class Dog : Creature, IPickupable
 
     private void OnCollisionEnter(Collision collision)
     {
-        Debug.Log(collision.transform.name);
         if (b_incapacitated)
         {
-            if(collision.transform.gameObject.layer == lm_throwChecker.value)
+            if(collision.transform.gameObject.layer == Mathf.Log(lm_throwChecker.value,2))
             {
+                Debug.Log(collision.transform.name);
                 b_incapacitated = false;
             }
         }

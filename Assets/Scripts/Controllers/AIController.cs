@@ -10,9 +10,8 @@ public class AIController : Controller
     [SerializeField] private float f_movementSpeed;
     private Rigidbody rb;
     protected NavMeshPath nmp_pathToFollow;
-    private Vector3 v_target;
-    private Vector3 v_currentTarget;
     private bool b_undertakingAction;
+    private bool b_attack;
     // Start is called before the first frame update
     void Start()
     {
@@ -34,15 +33,6 @@ public class AIController : Controller
                     rb.velocity *= f_movementSpeed;
                 }
             }
-        }
-    }
-
-    private void DrawPath()
-    {
-        Debug.Log("Path length: " + nmp_pathToFollow.corners.Length);
-        for(int i = 0; i < nmp_pathToFollow.corners.Length; i++)
-        {
-
         }
     }
 }
