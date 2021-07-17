@@ -21,9 +21,15 @@ public class AIController : Controller
     // Update is called once per frame
     void FixedUpdate()
     {
+        b_attack = cr_owner.CanAttack;
         if (!b_undertakingAction)
         {
-            if(!cr_owner.Incapacitated && cr_owner.FollowingPath != null)
+            if(!cr_owner.Incapacitated && b_attack)
+            {
+                cr_owner.Attack();
+                b_attack = false;
+            }
+            else if(!cr_owner.Incapacitated && cr_owner.FollowingPath != null && !b_attack)
             {
                 if(cr_owner.FollowingPath.corners.Length > 1)
                 {

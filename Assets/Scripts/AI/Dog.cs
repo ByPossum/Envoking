@@ -6,9 +6,14 @@ using UnityEngine.AI;
 
 public class Dog : Creature, IPickupable
 {
+    [SerializeField] private float f_attackCoolDown;
+    [SerializeField] private float f_hitBoxTimer;
+    [SerializeField] private LayerMask lm_throwChecker;
+    [SerializeField] private Collider col_hitBox;
+    private Creature cr_enemy;
     private DogActions da_currentAction = DogActions.none;
     public DogActions CurrentAction { get { return da_currentAction; } }
-    [SerializeField] private LayerMask lm_throwChecker;
+
     // Update is called once per frame
     void Update()
     {
@@ -30,19 +35,20 @@ public class Dog : Creature, IPickupable
 
     public override void Attack()
     {
-        
+        rb.AddForce((cr_enemy.transform.position - transform.position).normalized * 3, ForceMode.Impulse);
+        StartCoroutine(AttackHitbox());
     }
 
     private bool CheckActionToPerform()
     {
-        if (FindEnemy())
-        {
-            da_currentAction = DogActions.findEnemy;
-            return true;
-        }
         if (AbleToAttack())
         {
             da_currentAction = DogActions.attackEnemy;
+            return true;
+        }
+        else if (FindEnemy())
+        {
+            da_currentAction = DogActions.findEnemy;
             return true;
         }
         else if (FindInteractable())
@@ -77,8 +83,9 @@ public class Dog : Creature, IPickupable
         (float dist, int index) smallestValueIndex = (100f, 0);
         int iter = 0;
         nmp_checkingPath = new NavMeshPath();
+        Goblin[] goblins = FindObjectsOfType<Goblin>();
         // Collect all active goblin positions
-        foreach(Goblin gob in FindObjectsOfType<Goblin>())
+        foreach (Goblin gob in goblins)
         {
             if (!gob.enabled)
                 continue;
@@ -97,6 +104,7 @@ public class Dog : Creature, IPickupable
         }
         if(nmp_checkingPath.status == NavMeshPathStatus.PathComplete)
         {
+            cr_enemy = goblins[smallestValueIndex.index];
             nmp_followingPath = nmp_checkingPath;
             return true;
         }
@@ -105,8 +113,14 @@ public class Dog : Creature, IPickupable
 
     private bool AbleToAttack()
     {
-        //if (Vector3.Distance(nma_self.destination, transform.position) < 1f)
-        //    return true;
+        if(cr_enemy != null)
+        {
+            if (Vector3.Distance(cr_enemy.transform.position, transform.position) < 2f)
+            {
+                b_canAttack = true;
+                return true;
+            }
+        }
         return false;
     }
 
@@ -117,7 +131,12 @@ public class Dog : Creature, IPickupable
 
     public IEnumerator AttackHitbox()
     {
-        yield return new WaitForSeconds(0.5f);
+        col_hitBox.enabled = true;
+        yield return new WaitForSeconds(f_hitBoxTimer);
+        col_hitBox.enabled = false;
+        yield return new WaitForSeconds(f_attackCoolDown);
+        cr_enemy = null;
+        b_canAttack = false;
     }
 
     public void Pickup()

@@ -14,7 +14,6 @@ GameObject:
   - component: {fileID: 9069408303028756469}
   - component: {fileID: 2134034527764225396}
   - component: {fileID: 4075935113498669043}
-  - component: {fileID: 478816708176220511}
   - component: {fileID: 7384699346754456933}
   m_Layer: 0
   m_Name: Goblin
@@ -112,6 +111,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b7438af7479ef834489fa0c5232a2aea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  f_minRadius: 2
+  f_maxRadius: 5
 --- !u!54 &4075935113498669043
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -128,18 +129,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 80
   m_CollisionDetection: 0
---- !u!114 &478816708176220511
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2854234226804170477}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d7222a6b704137a43a98198744bedd44, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &7384699346754456933
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -153,4 +142,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cr_owner: {fileID: 2134034527764225396}
-  f_movementSpeed: 0
+  f_movementSpeed: 1
