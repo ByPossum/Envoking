@@ -65,8 +65,10 @@ public class PlayerController : Controller
 
     private void FireBullet()
     {
-        GameObject bull = Instantiate(go_bullet, transform.position + (transform.forward), Quaternion.identity);
+        PoolManager pm = UniversalOverlord.x.GetManager<PoolManager>(ManagerTypes.PoolManager);
+        GameObject bull = pm.SpawnObject(go_bullet.name, transform.position + (transform.forward), Quaternion.identity);
         bull.GetComponent<Rigidbody>().AddForce(transform.forward * 20f, ForceMode.Impulse);
+        bull.GetComponent<Bullet>().SetOwner(bi_input);
         b_canFire = false;
         StartCoroutine(FireCooldown());
     }
@@ -136,6 +138,11 @@ public class PlayerController : Controller
     {
         yield return new WaitForSeconds(f_shotSpeed);
         b_canPickup = true;
+    }
+
+    public void TakeDamage(float _damage)
+    {
+
     }
 }
 

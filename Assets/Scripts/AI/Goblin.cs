@@ -7,7 +7,12 @@ public class Goblin : Creature
 {
     [SerializeField] private float f_minRadius;
     [SerializeField] private float f_maxRadius;
+    [SerializeField] private float f_shootingTime;
+    [SerializeField] private float f_shootingForce;
+    [SerializeField] private GameObject go_bullet;
+    private bool b_shootCooldown = false;
     private float hp = 5;
+    private Vector3 v_shootingPos;
     protected GoblinActions ga_currentAction;
     public GoblinActions CurrentAction { get { return ga_currentAction; } }
 
@@ -18,9 +23,10 @@ public class Goblin : Creature
             Destroy(gameObject);
         if (!b_incapacitated)
         {
-            if (ShootAtPlayer())
+            if (!b_shootCooldown && ShootAtPlayer())
             {
-
+                b_canAttack = true;
+                StartCoroutine(ShootCooldown());
             }
             else if (CheckIfBeingAttacked())
             {
@@ -56,17 +62,37 @@ public class Goblin : Creature
 
     private bool ShootAtPlayer()
     {
+        Vector3 playerPos = FindObjectOfType<PlayerController>().transform.position;
+        if(Vector3.Distance(transform.position, playerPos) > f_minRadius)
+        {
+            v_shootingPos = playerPos;
+            return true;
+        }
         return false;
     }
 
     public override void Attack()
     {
         b_canAttack = false;
+        PoolManager pm = UniversalOverlord.x.GetManager<PoolManager>(ManagerTypes.PoolManager);
+        GameObject bullet = pm.SpawnObject(go_bullet.name, transform.position + transform.forward.normalized, transform.rotation);
+        
+        Rigidbody bulrb = bullet.GetComponent<Rigidbody>();
+        bulrb.AddForce((v_shootingPos - transform.position).normalized * f_shootingForce, ForceMode.Impulse);
+        bullet.GetComponent<Bullet>().SetOwner(this);
     }
 
-    public void TakeDamage(float _damage)
+    public override void TakeDamage(float _damage)
     {
         hp -= _damage;
+    }
+
+    private IEnumerator ShootCooldown()
+    {
+        yield return new WaitForEndOfFrame();
+        b_shootCooldown = true;
+        yield return new WaitForSeconds(f_shootingTime);
+        b_shootCooldown = false;
     }
 }
 

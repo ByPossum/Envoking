@@ -8,11 +8,15 @@ public class Dog : Creature, IPickupable
 {
     [SerializeField] private float f_attackCoolDown;
     [SerializeField] private float f_hitBoxTimer;
+    [SerializeField] private float f_attackForce;
+    [SerializeField] private float f_attackDamage;
     [SerializeField] private LayerMask lm_throwChecker;
     [SerializeField] private Collider col_hitBox;
     private Creature cr_enemy;
     private DogActions da_currentAction = DogActions.none;
     public DogActions CurrentAction { get { return da_currentAction; } }
+    public float AttackForce { get { return f_attackForce; } }
+    public float AttackDamage { get { return f_attackDamage; } }
 
     // Update is called once per frame
     void Update()
@@ -71,8 +75,11 @@ public class Dog : Creature, IPickupable
         nmp_checkingPath = new NavMeshPath();
         if (NavMesh.CalculatePath(transform.position, FindObjectOfType<PlayerController>().transform.position, -1, nmp_checkingPath))
         {
-            nmp_followingPath = nmp_checkingPath;
-            return true;
+            if(nmp_checkingPath.status == NavMeshPathStatus.PathComplete)
+            {
+                nmp_followingPath = nmp_checkingPath;
+                return true;
+            }
         }
         return false;
     }
@@ -90,7 +97,12 @@ public class Dog : Creature, IPickupable
             if (!gob.enabled)
                 continue;
             if (NavMesh.CalculatePath(transform.position, gob.transform.position, -1, nmp_checkingPath))
-                allGoblinPos.Add(gob.transform.position);
+            {
+                if(nmp_checkingPath.status == NavMeshPathStatus.PathComplete)
+                {
+                    allGoblinPos.Add(gob.transform.position);
+                }
+            }
         }
         // If there are no available goblins, action cannot be completed
         if(allGoblinPos.Count < 1)

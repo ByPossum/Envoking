@@ -97,6 +97,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pa_controller: {fileID: 0}
-  v_offset: {x: 0, y: 30, z: -24}
-  v_walkingOffset: {x: 0, y: 60, z: -48}
+  v_offset: {x: 0, y: 15, z: -12}
+  v_walkingOffset: {x: 0, y: 30, z: -24}
   f_cameraSpeed: 0.01

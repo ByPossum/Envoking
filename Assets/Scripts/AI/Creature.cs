@@ -25,4 +25,9 @@ public class Creature : BaseInput
     }
 
     public virtual void Attack() { }
+    public virtual void Knockback(Vector3 _direction, float _force)
+    {
+        rb.AddForce(_direction * _force, ForceMode.Impulse);
+    }
+    public virtual void TakeDamage(float f_damage) { }
 }
