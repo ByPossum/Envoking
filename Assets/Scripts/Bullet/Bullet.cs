@@ -13,7 +13,6 @@ public class Bullet : MonoBehaviour
         StopAllCoroutines();
         bi_owner = _newOwner;
         StartCoroutine(DeathTimer());
-
     }
 
     private void OnCollisionEnter(Collision collision)

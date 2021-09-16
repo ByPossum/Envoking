@@ -32,6 +32,12 @@ public class PlayerController : Controller
         bi_input = GetComponent<BaseInput>();
     }
 
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.GetComponent<IUsable>() != null)
+            collision.gameObject.GetComponent<IUsable>().Interact();
+    }
+
     // Update is called once per frame
     void Update()
     {

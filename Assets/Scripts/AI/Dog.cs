@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 using UnityEngine.AI;
 
 
@@ -35,6 +36,8 @@ public class Dog : Creature, IPickupable
                 b_incapacitated = false;
             }
         }
+        if (collision.gameObject.GetComponent<IDogable>() != null)
+            collision.gameObject.GetComponent<IDogable>().Interact();
     }
 
     public override void Attack()
@@ -138,7 +141,34 @@ public class Dog : Creature, IPickupable
 
     private bool FindInteractable()
     {
-        return false;
+        IDogable[] interactables = FindObjectsOfType<MonoBehaviour>().OfType<IDogable>().ToArray();
+        if (interactables.Length == 0)
+            return false;
+        List<IDogable> pathedInteractables = new List<IDogable>();
+        nmp_checkingPath = new NavMeshPath();
+        for (int i = 0; i < interactables.Length; i++)
+        {
+            GameObject obj = interactables[i].GetGameObject();
+            if(NavMesh.CalculatePath(transform.position, obj.transform.position, -1, nmp_checkingPath))
+            {
+                if (nmp_checkingPath.status == NavMeshPathStatus.PathComplete)
+                    pathedInteractables.Add(interactables[i]);
+            }
+        }
+        if (pathedInteractables.Count == 0)
+            return false;
+        GameObject objectToMoveTowards = null;
+        float lowestDistance = 100;
+        foreach(IDogable inter in pathedInteractables)
+            if(Vector3.Distance(transform.position, inter.GetGameObject().transform.position) < lowestDistance)
+            {
+                objectToMoveTowards = inter.GetGameObject();
+                lowestDistance = Vector3.Distance(transform.position, inter.GetGameObject().transform.position);
+            }
+        if (objectToMoveTowards == null)
+            return false;
+        NavMesh.CalculatePath(transform.position, objectToMoveTowards.transform.position, -1, nmp_followingPath);
+        return true;
     }
 
     public IEnumerator AttackHitbox()
