@@ -54,4 +54,8 @@ public class PoolManager : Manager
         obtainedPool.KillObject(_pooledObject);
     }
 
+    public int GetActiveObjectsInPool(GameObject _poolType)
+    {
+        return D_pools[_poolType.name].ObjectCount();
+    }
 }

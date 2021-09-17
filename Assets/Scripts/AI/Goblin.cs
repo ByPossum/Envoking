@@ -5,28 +5,39 @@ using UnityEngine.AI;
 
 public class Goblin : Creature
 {
+    [SerializeField] private float f_maxHealth;
     [SerializeField] private float f_minRadius;
     [SerializeField] private float f_maxRadius;
     [SerializeField] private float f_shootingTime;
     [SerializeField] private float f_shootingForce;
     [SerializeField] private GameObject go_bullet;
     private bool b_shootCooldown = false;
-    private float hp = 5;
+    private float hp;
     private Vector3 v_shootingPos;
     protected GoblinActions ga_currentAction;
     public GoblinActions CurrentAction { get { return ga_currentAction; } }
+
+    private void Awake()
+    {
+        hp = f_maxHealth;
+    }
 
     // Update is called once per frame
     void Update()
     {
         if (hp <= 0)
-            Destroy(gameObject);
+        {
+            UniversalOverlord.x.GetManager<PoolManager>(ManagerTypes.PoolManager).ReturnToPool(gameObject);
+            rb.velocity = Vector3.zero;
+            hp = f_maxHealth;
+        }
         if (!b_incapacitated)
         {
             if (!b_shootCooldown && ShootAtPlayer())
             {
                 b_canAttack = true;
-                StartCoroutine(ShootCooldown());
+                if(isActiveAndEnabled)
+                    StartCoroutine(ShootCooldown());
             }
             else if (CheckIfBeingAttacked())
             {

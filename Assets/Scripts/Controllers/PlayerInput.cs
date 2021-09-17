@@ -20,4 +20,8 @@ public class PlayerInput : BaseInput
         v_action.z = Input.GetAxis("Fire3");
         f_special = Input.GetAxis("Submit");
     }
+    public void NoJump()
+    {
+        v_movement.y = 0.0f;
+    }
 }

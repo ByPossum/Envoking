@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 2134034527764225396}
   - component: {fileID: 4075935113498669043}
   - component: {fileID: 7384699346754456933}
+  - component: {fileID: 4170027482159455784}
   m_Layer: 0
   m_Name: Goblin
   m_TagString: Untagged
@@ -111,6 +112,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b7438af7479ef834489fa0c5232a2aea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  f_maxHealth: 5
   f_minRadius: 7
   f_maxRadius: 40
   f_shootingTime: 1
@@ -146,3 +148,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cr_owner: {fileID: 2134034527764225396}
   f_movementSpeed: 1
+--- !u!114 &4170027482159455784
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2854234226804170477}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c557021779d2abf4b970801dc1fc8972, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

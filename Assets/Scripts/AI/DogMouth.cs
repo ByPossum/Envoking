@@ -12,6 +12,7 @@ public class DogMouth : MonoBehaviour
             Goblin monsterAttacked = other.GetComponent<Goblin>();
             monsterAttacked.TakeDamage(dog_owner.AttackDamage);
             monsterAttacked.Knockback(Vector3.Scale(monsterAttacked.transform.position - transform.position, Vector3.one - Vector3.up).normalized, dog_owner.AttackForce);
+            GetComponentInParent<Rigidbody>().velocity = Vector3.zero;
         }
     }
 }

@@ -24,11 +24,11 @@ public class Bullet : MonoBehaviour
             {
                 case PlayerInput player:
                     player.GetComponent<PlayerController>().TakeDamage(f_damage);
-                    UniversalOverlord.x.GetManager<PoolManager>(ManagerTypes.PoolManager).ReturnToPool(gameObject);
+                    Die();
                     break;
                 case Creature npc:
                     npc.TakeDamage(f_damage);
-                    UniversalOverlord.x.GetManager<PoolManager>(ManagerTypes.PoolManager).ReturnToPool(gameObject);
+                    Die();
                     break;
                 default:
                     break;
@@ -36,7 +36,7 @@ public class Bullet : MonoBehaviour
         }
         else if (collision.transform.GetComponent<Bullet>())
         {
-            UniversalOverlord.x.GetManager<PoolManager>(ManagerTypes.PoolManager).ReturnToPool(gameObject);
+            Die();
         }
 
     }
@@ -44,6 +44,12 @@ public class Bullet : MonoBehaviour
     private IEnumerator DeathTimer()
     {
         yield return new WaitForSeconds(f_lifetime);
+        Die();
+    }
+
+    private void Die()
+    {
         UniversalOverlord.x.GetManager<PoolManager>(ManagerTypes.PoolManager).ReturnToPool(gameObject);
+        GetComponent<Rigidbody>().velocity = Vector3.zero;
     }
 }

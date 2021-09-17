@@ -42,7 +42,8 @@ public class Dog : Creature, IPickupable
 
     public override void Attack()
     {
-        rb.AddForce((cr_enemy.transform.position - transform.position).normalized * 3, ForceMode.Impulse);
+        if(cr_enemy != null)
+            rb.AddForce((cr_enemy.transform.position - transform.position).normalized * 3, ForceMode.Impulse);
         StartCoroutine(AttackHitbox());
     }
 
@@ -167,6 +168,7 @@ public class Dog : Creature, IPickupable
             }
         if (objectToMoveTowards == null)
             return false;
+        nmp_followingPath = new NavMeshPath();
         NavMesh.CalculatePath(transform.position, objectToMoveTowards.transform.position, -1, nmp_followingPath);
         return true;
     }

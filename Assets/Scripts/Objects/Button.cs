@@ -21,6 +21,6 @@ public class Button : MonoBehaviour, IDogable, IUsable
             foreach (GameObject go_off in L_turnOff)
                 go_off.SetActive(false);
         transform.position = new Vector3(transform.position.x, -0.4f, transform.position.z);
-        enabled = false;
+        Destroy(this);
     }
 }

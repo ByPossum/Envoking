@@ -8,6 +8,7 @@ public class PlayerController : Controller
 {
     private Rigidbody rb;
     private Collider col;
+    private bool b_canJump = true;
     private bool b_canPickup = true;
     private bool b_canFire = true;
     private GameObject go_heldObject;
@@ -21,15 +22,17 @@ public class PlayerController : Controller
     [SerializeField] private GameObject go_bullet;
     [SerializeField] private Camera cam;
     [SerializeField] private LayerMask lm_pickupLayers;
+    [SerializeField] private LayerMask lm_groundChecker;
 
     public PlayerAction CurrentAction { get { return pa_currentAction; } }
+    public bool SetCanJump { set { b_canJump = value; } }
 
     // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody>();
         col = GetComponent<Collider>();
-        bi_input = GetComponent<BaseInput>();
+        bi_input = GetComponent<PlayerInput>();
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -59,9 +62,16 @@ public class PlayerController : Controller
         transform.rotation = Quaternion.LookRotation(lookPoint - Vector3.Scale(transform.position, Vector3.one - Vector3.up));
 
         // Movement
+
+        if (!b_canJump)
+        {
+            PlayerInput playerInp = (PlayerInput)bi_input;
+            playerInp.NoJump();
+            bi_input = playerInp;
+        }
+
         rb.AddForce((bi_input.Movement.normalized * Time.deltaTime) * f_movementSpeed, ForceMode.Impulse);
         rb.velocity = (bi_input.Movement != Vector3.zero ? Vector3.ClampMagnitude(rb.velocity, 10f) : Vector3.zero + Physics.gravity);
-
         // Action Checking
         if (rb.velocity.x != 0.0f || rb.velocity.z != 0.0f && CheckExclusiveActions())
             pa_currentAction = PlayerAction.walking;

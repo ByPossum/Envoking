@@ -51,4 +51,15 @@ public class Pool : MonoBehaviour
         if (objToKill != null)
             objToKill.Die(Vector3.zero);
     }
+
+    public int ObjectCount()
+    {
+        int activeObjects = 0;
+        foreach(Poolable po in pool_objects)
+        {
+            if (po.isActiveAndEnabled)
+                activeObjects++;
+        }
+        return activeObjects;
+    }
 }
