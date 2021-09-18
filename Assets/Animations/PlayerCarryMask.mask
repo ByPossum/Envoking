@@ -1,0 +1,75 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!319 &31900000
+AvatarMask:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: PlayerCarryMask
+  m_Mask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+  m_Elements:
+  - m_Path: 
+    m_Weight: 1
+  - m_Path: BaseSkeleton
+    m_Weight: 1
+  - m_Path: BaseSkeleton/Base
+    m_Weight: 1
+  - m_Path: BaseSkeleton/Base/L_LegB
+    m_Weight: 0
+  - m_Path: BaseSkeleton/Base/L_LegB/L_Knee
+    m_Weight: 0
+  - m_Path: BaseSkeleton/Base/L_LegB/L_Knee/L_Foot
+    m_Weight: 0
+  - m_Path: BaseSkeleton/Base/L_LegB/L_Knee/L_Foot/L_Heel
+    m_Weight: 0
+  - m_Path: BaseSkeleton/Base/L_LegB/L_Knee/L_Foot/L_Toe
+    m_Weight: 0
+  - m_Path: BaseSkeleton/Base/R_LegB
+    m_Weight: 0
+  - m_Path: BaseSkeleton/Base/R_LegB/R_Knee
+    m_Weight: 0
+  - m_Path: BaseSkeleton/Base/R_LegB/R_Knee/R_Foot
+    m_Weight: 0
+  - m_Path: BaseSkeleton/Base/R_LegB/R_Knee/R_Foot/R_Heel
+    m_Weight: 0
+  - m_Path: BaseSkeleton/Base/R_LegB/R_Knee/R_Foot/R_Toe
+    m_Weight: 0
+  - m_Path: BaseSkeleton/Base/Spine1
+    m_Weight: 0
+  - m_Path: BaseSkeleton/Base/Spine1/Spine2
+    m_Weight: 0
+  - m_Path: BaseSkeleton/Base/Spine1/Spine2/Chest
+    m_Weight: 1
+  - m_Path: BaseSkeleton/Base/Spine1/Spine2/Chest/L_Clavical
+    m_Weight: 1
+  - m_Path: BaseSkeleton/Base/Spine1/Spine2/Chest/L_Clavical/L_Sholder
+    m_Weight: 1
+  - m_Path: BaseSkeleton/Base/Spine1/Spine2/Chest/L_Clavical/L_Sholder/L_Elbow
+    m_Weight: 1
+  - m_Path: BaseSkeleton/Base/Spine1/Spine2/Chest/L_Clavical/L_Sholder/L_Elbow/L_Wrist
+    m_Weight: 1
+  - m_Path: BaseSkeleton/Base/Spine1/Spine2/Chest/L_Clavical/L_Sholder/L_Elbow/L_Wrist/L_Hand
+    m_Weight: 1
+  - m_Path: BaseSkeleton/Base/Spine1/Spine2/Chest/Neck
+    m_Weight: 1
+  - m_Path: BaseSkeleton/Base/Spine1/Spine2/Chest/Neck/Neck2
+    m_Weight: 1
+  - m_Path: BaseSkeleton/Base/Spine1/Spine2/Chest/Neck/Neck2/Head
+    m_Weight: 1
+  - m_Path: BaseSkeleton/Base/Spine1/Spine2/Chest/Neck/Neck2/Head/HeadPoint
+    m_Weight: 1
+  - m_Path: BaseSkeleton/Base/Spine1/Spine2/Chest/R_Clavical
+    m_Weight: 1
+  - m_Path: BaseSkeleton/Base/Spine1/Spine2/Chest/R_Clavical/R_Sholder
+    m_Weight: 1
+  - m_Path: BaseSkeleton/Base/Spine1/Spine2/Chest/R_Clavical/R_Sholder/R_Elbow
+    m_Weight: 1
+  - m_Path: BaseSkeleton/Base/Spine1/Spine2/Chest/R_Clavical/R_Sholder/R_Elbow/R_Wrist
+    m_Weight: 1
+  - m_Path: BaseSkeleton/Base/Spine1/Spine2/Chest/R_Clavical/R_Sholder/R_Elbow/R_Wrist/R_Hand
+    m_Weight: 1
+  - m_Path: Mesh
+    m_Weight: 1
+  - m_Path: Mesh/Byron
+    m_Weight: 1

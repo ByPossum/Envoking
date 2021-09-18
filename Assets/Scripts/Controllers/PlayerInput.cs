@@ -10,7 +10,6 @@ public class PlayerInput : BaseInput
     void Update()
     {
         v_movement.x = Input.GetAxis("Horizontal");
-        v_movement.y = Input.GetAxis("Jump");
         v_movement.z = Input.GetAxis("Vertical");
         v_looking.x = Input.mousePosition.x;
         v_looking.y = Input.mousePosition.y;
@@ -19,6 +18,7 @@ public class PlayerInput : BaseInput
         v_action.y = Input.GetAxis("Fire2");
         v_action.z = Input.GetAxis("Fire3");
         f_special = Input.GetAxis("Submit");
+        b_jump = Input.GetAxis("Jump") > 0f ? true : false;
     }
     public void NoJump()
     {
