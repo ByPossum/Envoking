@@ -60,7 +60,7 @@ ModelImporter:
       curves: []
       events:
       - time: 0.79871166
-        functionName: FireBullet
+        functionName: Attack
         data: 
         objectReferenceParameter: {instanceID: 0}
         floatParameter: 0

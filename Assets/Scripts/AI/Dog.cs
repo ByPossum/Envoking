@@ -7,23 +7,40 @@ using UnityEngine.AI;
 
 public class Dog : Creature, IPickupable
 {
+    private const float f_heartTime = 1.5f;
+
+    private bool b_inPetPosition = false;
     [SerializeField] private float f_attackCoolDown;
     [SerializeField] private float f_hitBoxTimer;
     [SerializeField] private float f_attackForce;
     [SerializeField] private float f_attackDamage;
-    [SerializeField] private LayerMask lm_throwChecker;
+    [SerializeField] private float f_playerDistance;
+    [SerializeField] private float f_petTransitionSpeed;
     [SerializeField] private Collider col_hitBox;
+    [SerializeField] private LayerMask lm_throwChecker;
+    [SerializeField] private GameObject go_loveHearts;
+    private DogAnimator da_anim;
     private Creature cr_enemy;
     private DogActions da_currentAction = DogActions.none;
     public DogActions CurrentAction { get { return da_currentAction; } }
+    public bool InPetPosition { get { return b_inPetPosition; } }
     public float AttackForce { get { return f_attackForce; } }
     public float AttackDamage { get { return f_attackDamage; } }
+
+    protected override void Start()
+    {
+        base.Start();
+        da_anim = GetComponent<DogAnimator>();
+    }
 
     // Update is called once per frame
     void Update()
     {
-        if(!b_incapacitated)
+        if(!b_incapacitated && !CheckExclusiveActions())
+        {
             CheckActionToPerform();
+
+        }
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -52,32 +69,74 @@ public class Dog : Creature, IPickupable
         if (AbleToAttack())
         {
             da_currentAction = DogActions.attackEnemy;
+            da_anim.SetAnimTrigger("Attack");
             return true;
         }
         else if (FindEnemy())
         {
             da_currentAction = DogActions.findEnemy;
+            da_anim.SetAnimFloat("Walk", 1f);
             return true;
         }
         else if (FindInteractable())
         {
             da_currentAction = DogActions.findInteractable;
+            da_anim.SetAnimFloat("Walk", 1f);
             return true;
         }
-        else if (FindPlayer())
+        else if (NextToPlayer())
+        {
+            da_currentAction = DogActions.none;
+            da_anim.SetAnimFloat("Walk", 0.0f);
+        }
+        else if (FindPlayer() && !(Vector3.Distance(transform.position, FindObjectOfType<PlayerController>().transform.position) < f_playerDistance))
         {
             da_currentAction = DogActions.follow;
+            da_anim.SetAnimFloat("Walk", 1f);
             return true;
         }
-        da_currentAction = DogActions.stay;
+        else
+        {
+            da_currentAction = DogActions.none;
+            da_anim.SetAnimFloat("Walk", 0f);
+        }
+        return false;
+    }
+
+    private bool CheckExclusiveActions()
+    {
+        switch (da_currentAction)
+        {
+            case DogActions.attackEnemy:
+                return true;
+            case DogActions.pickedUp:
+                return true;
+            case DogActions.stay:
+                return true;
+            case DogActions.Pet:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private bool NextToPlayer()
+    {
+        if (Vector3.Distance(transform.position, FindObjectOfType<PlayerController>().transform.position) < f_playerDistance)
+        {
+            da_currentAction = DogActions.none;
+            return true;
+        }
         return false;
     }
 
     private bool FindPlayer()
     {
-        // TODO: Add a distance to make it feel more natural
         nmp_checkingPath = new NavMeshPath();
-        if (NavMesh.CalculatePath(transform.position, FindObjectOfType<PlayerController>().transform.position, -1, nmp_checkingPath))
+        Vector3 randVector = Utils.RandomVector3(f_playerDistance, 0f, f_playerDistance, true);
+        Vector3 playerPos = FindObjectOfType<PlayerController>().transform.position;
+        randVector = (transform.position - playerPos).normalized * Mathf.Abs(randVector.x) + ((Vector3.Cross(Vector3.up, transform.position - playerPos).normalized * randVector.z));
+        if (NavMesh.CalculatePath(transform.position, playerPos + randVector, -1, nmp_checkingPath))
         {
             if(nmp_checkingPath.status == NavMeshPathStatus.PathComplete)
             {
@@ -121,6 +180,10 @@ public class Dog : Creature, IPickupable
         if(nmp_checkingPath.status == NavMeshPathStatus.PathComplete)
         {
             cr_enemy = goblins[smallestValueIndex.index];
+            Vector3 unitVec = Utils.RandomVector3(1f, 0, 1f, true);
+            Vector3 enemyPos = cr_enemy.transform.position;
+            unitVec = (enemyPos - transform.position).normalized * Mathf.Abs(unitVec.x) + (Vector3.Cross(Vector3.up, enemyPos - transform.position).normalized * unitVec.z) * 0.7f;
+            NavMesh.CalculatePath(transform.position, (unitVec.normalized * Random.Range(1f, f_playerDistance)) + enemyPos, 1, nmp_followingPath);
             nmp_followingPath = nmp_checkingPath;
             return true;
         }
@@ -193,6 +256,56 @@ public class Dog : Creature, IPickupable
     {
         da_currentAction = DogActions.none;
     }
+    public void Pet(Vector3 _posToMoveTo, Vector3 _rot)
+    {
+        b_incapacitated = true;
+        da_currentAction = DogActions.Pet;
+        StartCoroutine(GetPet(_posToMoveTo, _rot));
+    }
+
+    public void SetInPetPosition()
+    {
+        b_inPetPosition = !b_inPetPosition;
+    }
+
+    public void StopPet()
+    {
+        Debug.Log("I stop being pet");
+        b_inPetPosition = false;
+        b_incapacitated = false;
+        da_currentAction = DogActions.none;
+    }
+
+    public void TurnLoveHeartsOn()
+    {
+        go_loveHearts.SetActive(true);
+        StartCoroutine(TurnOffHearts());
+    }
+
+    public IEnumerator GetPet(Vector3 _posToMoveTo, Vector3 _rot)
+    {
+        Vector3 startPoint = transform.position;
+        float startTime = Time.time;
+        _posToMoveTo = new Vector3(_posToMoveTo.x, transform.position.y, _posToMoveTo.z);
+        float journey = Vector3.Distance(startPoint, _posToMoveTo);
+        transform.rotation = Quaternion.LookRotation(_rot);
+        while(transform.position != _posToMoveTo)
+        {
+            float distance = (Time.time - startTime) * f_petTransitionSpeed;
+            float t = distance / journey;
+            transform.position = Vector3.Lerp(startPoint, _posToMoveTo, t);
+            yield return new WaitForEndOfFrame();
+        }
+        rb.angularVelocity = Vector3.zero;
+        rb.velocity = Vector3.zero;
+        da_anim.SetAnimTrigger("Pet");
+    }
+
+    public IEnumerator TurnOffHearts()
+    {
+        yield return new WaitForSeconds(f_heartTime);
+        go_loveHearts.SetActive(false);
+    }
 }
 
 public enum DogActions
@@ -204,5 +317,6 @@ public enum DogActions
     findInteractable,
     interact,
     pickedUp,
-    stay
+    stay,
+    Pet
 }

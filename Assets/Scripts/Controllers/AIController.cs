@@ -26,7 +26,7 @@ public class AIController : Controller
         {
             if(!cr_owner.Incapacitated && b_attack)
             {
-                cr_owner.Attack();
+                //cr_owner.Attack();
                 b_attack = false;
             }
             else if(!cr_owner.Incapacitated && cr_owner.FollowingPath != null && !b_attack)
@@ -35,7 +35,10 @@ public class AIController : Controller
                 {
                     nmp_pathToFollow = cr_owner.FollowingPath;
                     rb.AddForce((nmp_pathToFollow.corners[1] - transform.position).normalized, ForceMode.Impulse);
-                    transform.rotation = Quaternion.LookRotation((nmp_pathToFollow.corners[1] - transform.position).normalized - Vector3.Scale(transform.position, Vector3.one - Vector3.up));
+                    Vector3 direction = Vector3.Scale((nmp_pathToFollow.corners[1] - transform.position).normalized, Vector3.one - Vector3.up);
+                    if (direction.magnitude > 0.5f)
+                        transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(direction), 0.3f);
+                    //transform.rotation = Quaternion.LookRotation((nmp_pathToFollow.corners[1] - transform.position).normalized - Vector3.Scale(transform.position, Vector3.one - Vector3.up));
                     rb.velocity *= f_movementSpeed;
                 }
             }

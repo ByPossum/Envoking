@@ -17,7 +17,7 @@ public class PlayerInput : BaseInput
         v_action.x = Input.GetAxis("Fire1");
         v_action.y = Input.GetAxis("Fire2");
         v_action.z = Input.GetAxis("Fire3");
-        f_special = Input.GetAxis("Submit");
+        b_special = Input.GetButtonDown("Submit");
         b_jump = Input.GetAxis("Jump") > 0f ? true : false;
     }
     public void NoJump()

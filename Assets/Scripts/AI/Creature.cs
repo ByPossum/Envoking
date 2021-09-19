@@ -13,7 +13,7 @@ public class Creature : BaseInput
     protected bool b_incapacitated = false;
     public bool Incapacitated { get { return b_incapacitated; } }
     // Start is called before the first frame update
-    protected void Start()
+    protected virtual void Start()
     {
         rb = GetComponent<Rigidbody>();
     }

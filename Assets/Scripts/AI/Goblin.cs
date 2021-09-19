@@ -11,11 +11,18 @@ public class Goblin : Creature
     [SerializeField] private float f_shootingTime;
     [SerializeField] private float f_shootingForce;
     [SerializeField] private GameObject go_bullet;
+    private GoblinAnimator ga_anim;
     private bool b_shootCooldown = false;
     private float hp;
     private Vector3 v_shootingPos;
     protected GoblinActions ga_currentAction;
     public GoblinActions CurrentAction { get { return ga_currentAction; } }
+
+    protected override void Start()
+    {
+        base.Start();
+        ga_anim = GetComponent<GoblinAnimator>();
+    }
 
     private void Awake()
     {
@@ -27,17 +34,13 @@ public class Goblin : Creature
     {
         if (hp <= 0)
         {
-            UniversalOverlord.x.GetManager<PoolManager>(ManagerTypes.PoolManager).ReturnToPool(gameObject);
-            rb.velocity = Vector3.zero;
-            hp = f_maxHealth;
+            ga_anim.SetAnimTrigger("Die");
         }
         if (!b_incapacitated)
         {
-            if (!b_shootCooldown && ShootAtPlayer())
+            if (ShootAtPlayer())
             {
-                b_canAttack = true;
-                if(isActiveAndEnabled)
-                    StartCoroutine(ShootCooldown());
+                ga_anim.SetAnimTrigger("Attack");
             }
             else if (CheckIfBeingAttacked())
             {
@@ -55,10 +58,10 @@ public class Goblin : Creature
         Vector3 playerPos = FindObjectOfType<PlayerController>().transform.position;
         if (Vector3.Distance(transform.position, playerPos) < f_minRadius)
         {
-            float randomUnit = Random.Range(-1, 1);
-            Vector3 unitVec = new Vector3(randomUnit, 0.0f, randomUnit);
+            Vector3 unitVec = Utils.RandomVector3(1f, 0.0f, 1f, true);
+            unitVec = (transform.position - playerPos).normalized * Mathf.Abs(unitVec.x) + (Vector3.Cross(Vector3.up, transform.position - playerPos).normalized * unitVec.z) * 0.7f;
             nmp_checkingPath = new NavMeshPath();
-            if(NavMesh.CalculatePath(transform.position, (unitVec.normalized * Random.Range(f_minRadius, f_maxRadius)) + playerPos, 1, nmp_checkingPath))
+            if (NavMesh.CalculatePath(transform.position, (unitVec.normalized * Random.Range(f_minRadius, f_maxRadius)) + playerPos, 1, nmp_checkingPath))
             {
                 return true;
             }
@@ -98,12 +101,11 @@ public class Goblin : Creature
         hp -= _damage;
     }
 
-    private IEnumerator ShootCooldown()
+    public void Death()
     {
-        yield return new WaitForEndOfFrame();
-        b_shootCooldown = true;
-        yield return new WaitForSeconds(f_shootingTime);
-        b_shootCooldown = false;
+        UniversalOverlord.x.GetManager<PoolManager>(ManagerTypes.PoolManager).ReturnToPool(gameObject);
+        rb.velocity = Vector3.zero;
+        hp = f_maxHealth;
     }
 }
 

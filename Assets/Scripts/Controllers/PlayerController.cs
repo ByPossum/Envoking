@@ -7,15 +7,18 @@ using UnityEngine;
 [RequireComponent(typeof(PlayerAnimator))]
 public class PlayerController : Controller
 {
-    private Rigidbody rb;
-    private Collider col;
-    private PlayerAnimator pa_anim;
+    private float f_health;
     private bool b_canJump = true;
     private bool b_canPickup = true;
     private bool b_canFire = true;
+    private Collider col;
+    private Rigidbody rb;
     private GameObject go_heldObject;
+    private PlayerAnimator pa_anim;
+    private SkinnedMeshRenderer sm;
     private PlayerAction pa_currentAction = PlayerAction.none;
 
+    [SerializeField] private float f_maxHealth;
     [SerializeField] private float f_movementSpeed;
     [SerializeField] private float f_rotateSpeed;
     [SerializeField] private float f_shotSpeed;
@@ -23,6 +26,7 @@ public class PlayerController : Controller
     [SerializeField] private float f_jumpForce;
     [SerializeField] private Transform v_pickupTransform;
     [SerializeField] private GameObject go_bullet;
+    [SerializeField] private Transform t_petPoint;
     [SerializeField] private Camera cam;
     [SerializeField] private LayerMask lm_pickupLayers;
     [SerializeField] private LayerMask lm_groundChecker;
@@ -37,6 +41,8 @@ public class PlayerController : Controller
         col = GetComponent<Collider>();
         bi_input = GetComponent<PlayerInput>();
         pa_anim = GetComponent<PlayerAnimator>();
+        sm = GetComponentInChildren<SkinnedMeshRenderer>();
+        f_health = f_maxHealth;
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -50,44 +56,50 @@ public class PlayerController : Controller
     {
         // Attack Check
         if (bi_input.Actions.x > 0 && CheckExclusiveActions() && b_canFire)
+        {
+            pa_anim.SetAnimLayerWeight(1, 1f);
             pa_anim.SetAnimTrigger("Attack");
+        }
         // Pickup Check
         if (bi_input.Actions.y > 0 && b_canPickup)
             Pickup();
         // Petting Dog Check (This code needs to run on Group A and not on Group B)
-        if (bi_input.Special > 0 && CheckExclusiveActions())
+        if (bi_input.Special && CheckExclusiveActions())
             StrokeDog();
     }
 
     private void FixedUpdate()
     {
-        // Mouse based rotation
-        RaycastHit hit;
-        Physics.Raycast(cam.ScreenPointToRay(bi_input.Look), out hit);
-        Vector3 lookPoint = hit.point;
-        lookPoint.y = 0.0f;
-        transform.rotation = Quaternion.LookRotation(lookPoint - Vector3.Scale(transform.position, Vector3.one - Vector3.up));
-        // Jump Check (Happens in FixedUpdate due to applying force within an animation event)
-        if (bi_input.Jump && b_canJump && CheckExclusiveActions())
+        if(pa_currentAction != PlayerAction.stroking)
         {
-            pa_anim.SetAnimTrigger("Jump");
-            b_canJump = false;
-            pa_currentAction = PlayerAction.jumping;
+            // Mouse based rotation
+            RaycastHit hit;
+            Physics.Raycast(cam.ScreenPointToRay(bi_input.Look), out hit);
+            Vector3 lookPoint = hit.point;
+            lookPoint.y = 0.0f;
+            transform.rotation = Quaternion.LookRotation(lookPoint - Vector3.Scale(transform.position, Vector3.one - Vector3.up));
+            // Jump Check (Happens in FixedUpdate due to applying force within an animation event)
+            if (bi_input.Jump && b_canJump && CheckExclusiveActions())
+            {
+                pa_anim.SetAnimTrigger("Jump");
+                b_canJump = false;
+                pa_currentAction = PlayerAction.jumping;
+            }
+            // Movement
+            rb.AddForce((bi_input.Movement.normalized * Time.deltaTime) * f_movementSpeed, ForceMode.Impulse);
+            rb.velocity = (bi_input.Movement != Vector3.zero || pa_currentAction == PlayerAction.jumping ? Vector3.ClampMagnitude(rb.velocity, 10f) : Vector3.zero + Physics.gravity);
+            // Action Checking
+            if (bi_input.Movement.x != 0.0f || bi_input.Movement.z != 0.0f && CheckExclusiveActions())
+            {
+                pa_currentAction = PlayerAction.walking;
+                pa_anim.SetAnimFloat("WalkSpeed", Mathf.Abs(bi_input.Movement.x) >= 1 ? Mathf.Abs(bi_input.Movement.x) : Mathf.Abs(bi_input.Movement.z) >= 1 ? Mathf.Abs(bi_input.Movement.z) : 0.0f);
+            }
+            else if(CheckExclusiveActions())
+                pa_currentAction = PlayerAction.idle;
         }
-        // Movement
-        rb.AddForce((bi_input.Movement.normalized * Time.deltaTime) * f_movementSpeed, ForceMode.Impulse);
-        rb.velocity = (bi_input.Movement != Vector3.zero || pa_currentAction == PlayerAction.jumping ? Vector3.ClampMagnitude(rb.velocity, 10f) : Vector3.zero + Physics.gravity);
-        // Action Checking
-        if (bi_input.Movement.x != 0.0f || bi_input.Movement.z != 0.0f && CheckExclusiveActions())
-        {
-            pa_currentAction = PlayerAction.walking;
-            pa_anim.SetAnimFloat("WalkSpeed", Mathf.Abs(bi_input.Movement.x) >= 1 ? Mathf.Abs(bi_input.Movement.x) : Mathf.Abs(bi_input.Movement.z) >= 1 ? Mathf.Abs(bi_input.Movement.z) : 0.0f);
-        }
-        else if(CheckExclusiveActions())
-            pa_currentAction = PlayerAction.idle;
     }
 
-    private void FireBullet()
+    private void Attack()
     {
         PoolManager pm = UniversalOverlord.x.GetManager<PoolManager>(ManagerTypes.PoolManager);
         GameObject bull = pm.SpawnObject(go_bullet.name, transform.position + (transform.forward), Quaternion.identity);
@@ -141,7 +153,15 @@ public class PlayerController : Controller
 
     private void StrokeDog()
     {
-
+        RaycastHit hit;
+        if(Physics.SphereCast(transform.position, 1f, transform.forward, out hit, 2f, lm_pickupLayers, QueryTriggerInteraction.Ignore))
+        {
+            if (hit.collider.GetComponent<Dog>() != null)
+            {
+            pa_currentAction = PlayerAction.stroking;
+                StartCoroutine(PetDog(hit.collider.GetComponent<Dog>()));
+            }
+        }
     }
 
     private bool CheckExclusiveActions()
@@ -172,7 +192,18 @@ public class PlayerController : Controller
 
     public void TakeDamage(float _damage)
     {
-        pa_anim.SetAnimTrigger("Damage");
+        f_health -= _damage;
+        if(f_health <= 0f)
+        {
+            pa_anim.SetAnimLayerWeight(1, 0f);
+            pa_anim.SetAnimTrigger("Death");
+            pa_currentAction = PlayerAction.dead;
+        }
+        else
+        {
+            pa_anim.SetAnimLayerWeight(1, 0f);
+            pa_anim.SetAnimTrigger("Damage");
+        }
     }
 
     public void ResetJump()
@@ -182,6 +213,32 @@ public class PlayerController : Controller
     public void Jump()
     {
         rb.AddForce(Vector3.up * f_jumpForce, ForceMode.Impulse);
+    }
+
+    public void Death()
+    {
+        transform.position = Vector3.one * 10f;
+        rb.velocity = Vector3.zero;
+        rb.useGravity = false;
+        sm.enabled = false;
+        this.enabled = false;
+    }
+
+    public IEnumerator PetDog(Dog _dogToPet)
+    {
+        rb.velocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+        _dogToPet.Pet(t_petPoint.position, -transform.forward);
+        while (!_dogToPet.InPetPosition)
+        {
+            yield return new WaitForEndOfFrame();
+        }
+        pa_anim.SetAnimTrigger("Pet");
+    }
+
+    public void ReturnToIdle()
+    {
+        pa_currentAction = PlayerAction.idle;
     }
 }
 
@@ -193,5 +250,6 @@ public enum PlayerAction
     jumping,
     shooting,
     holding,
-    stroking
+    stroking,
+    dead,
 }
