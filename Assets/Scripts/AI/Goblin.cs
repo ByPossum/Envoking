@@ -76,8 +76,9 @@ public class Goblin : Creature
 
     private bool ShootAtPlayer()
     {
-        Vector3 playerPos = FindObjectOfType<PlayerController>().transform.position;
-        if(Vector3.Distance(transform.position, playerPos) > f_minRadius)
+        PlayerController player = FindObjectOfType<PlayerController>();
+        Vector3 playerPos = player.transform.position;
+        if (player.CheckUninteruptableActions() && Vector3.Distance(transform.position, playerPos) > f_minRadius)
         {
             v_shootingPos = playerPos;
             return true;

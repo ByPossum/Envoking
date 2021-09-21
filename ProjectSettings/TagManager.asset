@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Ground
   - Wall
+  - RespawnPoint
   layers:
   - Default
   - TransparentFX
@@ -18,8 +19,8 @@ TagManager:
   - Player
   - Ground
   - Pickups
-  - 
-  - 
+  - AIBlockers
+  - Bullet
   - 
   - 
   - 

@@ -7,6 +7,12 @@ public class Bullet : MonoBehaviour
     [SerializeField] private float f_damage;
     [SerializeField] private float f_lifetime;
     [SerializeField] private BaseInput bi_owner;
+    [SerializeField] private LayerMask lm_ignoreLayer;
+
+    public void Start()
+    {
+        Physics.IgnoreLayerCollision(gameObject.layer, (int)Mathf.Log(lm_ignoreLayer, 2));
+    }
 
     public void SetOwner(BaseInput _newOwner)
     {

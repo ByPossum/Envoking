@@ -7,10 +7,14 @@ using UnityEngine;
 [RequireComponent(typeof(PlayerAnimator))]
 public class PlayerController : Controller
 {
+    private const int i_MAXLIVES = 3;
+
     private float f_health;
     private bool b_canJump = true;
     private bool b_canPickup = true;
     private bool b_canFire = true;
+    private int i_currentLives;
+    private Vector3 v_currentSpawn;
     private Collider col;
     private Rigidbody rb;
     private GameObject go_heldObject;
@@ -18,6 +22,7 @@ public class PlayerController : Controller
     private SkinnedMeshRenderer sm;
     private PlayerAction pa_currentAction = PlayerAction.none;
 
+    [SerializeField] private Vector3 v_defaultRespawn;
     [SerializeField] private float f_maxHealth;
     [SerializeField] private float f_movementSpeed;
     [SerializeField] private float f_rotateSpeed;
@@ -30,9 +35,13 @@ public class PlayerController : Controller
     [SerializeField] private Camera cam;
     [SerializeField] private LayerMask lm_pickupLayers;
     [SerializeField] private LayerMask lm_groundChecker;
+    [SerializeField] private LayerMask lm_ignoreLayer;
 
+    public float CurrentHealth { get { return f_health; } }
+    public float MaxHealth { get { return f_maxHealth; } }
     public PlayerAction CurrentAction { get { return pa_currentAction; } }
     public bool SetCanJump { set { b_canJump = value; } }
+    public Vector3 SpawnPoint { set { v_currentSpawn = value; } }
 
     // Start is called before the first frame update
     void Start()
@@ -42,7 +51,10 @@ public class PlayerController : Controller
         bi_input = GetComponent<PlayerInput>();
         pa_anim = GetComponent<PlayerAnimator>();
         sm = GetComponentInChildren<SkinnedMeshRenderer>();
+        v_currentSpawn = v_defaultRespawn;
+        i_currentLives = i_MAXLIVES;
         f_health = f_maxHealth;
+        Physics.IgnoreLayerCollision(gameObject.layer, (int)Mathf.Log(lm_ignoreLayer.value,2f));
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -174,6 +186,10 @@ public class PlayerController : Controller
                 return false;
             case PlayerAction.jumping:
                 return false;
+            case PlayerAction.dead:
+                return false;
+            case PlayerAction.gameOver:
+                return false;
             default:
                 return true;
         }
@@ -188,6 +204,21 @@ public class PlayerController : Controller
     {
         yield return new WaitForSeconds(f_shotSpeed);
         b_canPickup = true;
+    }
+
+    public bool CheckUninteruptableActions()
+    {
+        switch (pa_currentAction)
+        {
+            case PlayerAction.stroking:
+                return false;
+            case PlayerAction.dead:
+                return false;
+            case PlayerAction.gameOver:
+                return false;
+            default:
+                return true;
+        }
     }
 
     public void TakeDamage(float _damage)
@@ -217,11 +248,28 @@ public class PlayerController : Controller
 
     public void Death()
     {
-        transform.position = Vector3.one * 10f;
         rb.velocity = Vector3.zero;
-        rb.useGravity = false;
-        sm.enabled = false;
-        this.enabled = false;
+        rb.angularVelocity = Vector3.zero;
+        if(i_currentLives > 0)
+        {
+            transform.position = v_currentSpawn;
+            pa_currentAction = PlayerAction.idle;
+            i_currentLives--;
+            f_health = f_maxHealth;
+        }
+        else
+        {
+            pa_currentAction = PlayerAction.gameOver;
+            transform.position = Vector3.one * 10f;
+            rb.useGravity = false;
+            sm.enabled = false;
+            this.enabled = false;
+        }
+    }
+
+    public void ReturnToIdle()
+    {
+        pa_currentAction = PlayerAction.idle;
     }
 
     public IEnumerator PetDog(Dog _dogToPet)
@@ -236,10 +284,6 @@ public class PlayerController : Controller
         pa_anim.SetAnimTrigger("Pet");
     }
 
-    public void ReturnToIdle()
-    {
-        pa_currentAction = PlayerAction.idle;
-    }
 }
 
 public enum PlayerAction
@@ -252,4 +296,5 @@ public enum PlayerAction
     holding,
     stroking,
     dead,
+    gameOver
 }

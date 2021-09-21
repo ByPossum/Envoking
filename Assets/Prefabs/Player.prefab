@@ -48,7 +48,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &8496900426418273118
 Transform:
   m_ObjectHideFlags: 0
@@ -228,6 +228,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca30b44134cc6b6478879cbc3584a88d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  v_defaultRespawn: {x: 0, y: 0, z: 0}
   f_maxHealth: 10
   f_movementSpeed: 20
   f_rotateSpeed: 90
@@ -244,6 +245,9 @@ MonoBehaviour:
   lm_groundChecker:
     serializedVersion: 2
     m_Bits: 512
+  lm_ignoreLayer:
+    serializedVersion: 2
+    m_Bits: 2048
 --- !u!95 &5201125627609218723
 Animator:
   serializedVersion: 3

@@ -9,6 +9,7 @@ public class PoolManager : Manager
     // Start is called before the first frame update
     public override void Init()
     {
+        DontDestroyOnLoad(this);
         foreach (PoolObjectQuantity poolable in poq_poolsToGenerate)
         {
             if (poolable.go_poolable.GetComponent<Poolable>() != null || poolable.go_poolable.GetComponentInChildren<Poolable>() != null)

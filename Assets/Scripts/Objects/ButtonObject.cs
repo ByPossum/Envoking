@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Button : MonoBehaviour, IDogable, IUsable
+public class ButtonObject : MonoBehaviour, IDogable, IUsable
 {
     [SerializeField] private List<GameObject> L_turnOn = new List<GameObject>();
     [SerializeField] private List<GameObject> L_turnOff = new List<GameObject>();

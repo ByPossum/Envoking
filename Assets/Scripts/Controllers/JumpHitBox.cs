@@ -10,7 +10,6 @@ public class JumpHitBox : MonoBehaviour
         if (other.gameObject.CompareTag("Ground"))
         {
             owner.SetCanJump = true;
-            Debug.Log("Can Jump");
         }
     }
     private void OnTriggerExit(Collider other)
