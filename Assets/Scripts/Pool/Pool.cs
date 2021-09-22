@@ -62,4 +62,9 @@ public class Pool : MonoBehaviour
         }
         return activeObjects;
     }
+
+    public Poolable[] GetPoolables()
+    {
+        return pool_objects;
+    }
 }

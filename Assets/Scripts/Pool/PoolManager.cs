@@ -59,4 +59,12 @@ public class PoolManager : Manager
     {
         return D_pools[_poolType.name].ObjectCount();
     }
+    public Poolable[] GetObjectCollection(string _objectName)
+    {
+        return D_pools[_objectName].GetPoolables();
+    }
+    public Poolable[] GetObjectCollection(GameObject _pooledObject)
+    {
+        return GetObjectCollection(_pooledObject.name);
+    }
 }

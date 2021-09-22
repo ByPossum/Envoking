@@ -157,8 +157,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -59}
-  m_SizeDelta: {x: -78, y: -118}
+  m_AnchoredPosition: {x: 1.7999878, y: 2.4483948}
+  m_SizeDelta: {x: -74.4765, y: -90.89676}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &207299978
 MonoBehaviour:
@@ -182,7 +182,7 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 12800000, guid: 69ec606efbce3f34e839eb3052ce2e5e, type: 3}
-    m_FontSize: 18
+    m_FontSize: 17
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 0
@@ -193,7 +193,21 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Hi There this is a consent form
+  m_Text: "This experiment is being conducted by Byron Crowhurst, BSc Computing for
+    Games student at Falmouth University. This research aims to explore the relationship
+    between players and NPCs. From this research I aims to help developers assess
+    the usefulness of Companions and social mechanics.\r\nPartaking in this study
+    will involve playing a short \"Bullet hell\" style game and then filling out
+    questionnaire. Answers from this questionnaire will be anonymised and analysed.
+    The data taken from the study will be held until 25th November 2021 whereby it
+    will be deleted.\r\nYou, the participant, have the right to withdraw at any point
+    from the start of this experiment until submitting data. This means that should
+    you wish to withdraw from the experiment, no data will be collected.\r\nShould
+    you have any questions about the experiment, you can email Byron Crowhurst at:
+    BC216857@falmouth.ac.uk.\r\nShould you have any concerns about the experiment
+    you can contact the Falmouth Ethics Committee at: Research@Falmouth.ac.uk\r\nBy
+    clicking the 'I consent' button I have read and understood the information presented
+    in this form and consent to participating in this experiment.\r"
 --- !u!222 &207299979
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -934,7 +948,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 165.9}
+  m_AnchoredPosition: {x: 0, y: 201}
   m_SizeDelta: {x: 0, y: -331.88983}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1592254674
