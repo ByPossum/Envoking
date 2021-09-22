@@ -60,7 +60,7 @@ public class Dog : Creature, IPickupable
     public override void Attack()
     {
         if(cr_enemy != null)
-            rb.AddForce((cr_enemy.transform.position - transform.position).normalized * 3, ForceMode.Impulse);
+            rb.AddForce((cr_enemy.transform.position - transform.position).normalized * 20, ForceMode.Impulse);
         StartCoroutine(AttackHitbox());
     }
 
@@ -107,8 +107,8 @@ public class Dog : Creature, IPickupable
     {
         switch (da_currentAction)
         {
-            case DogActions.attackEnemy:
-                return true;
+            //case DogActions.attackEnemy:
+            //    return true;
             case DogActions.pickedUp:
                 return true;
             case DogActions.stay:
@@ -270,7 +270,6 @@ public class Dog : Creature, IPickupable
 
     public void StopPet()
     {
-        Debug.Log("I stop being pet");
         b_inPetPosition = false;
         b_incapacitated = false;
         da_currentAction = DogActions.none;

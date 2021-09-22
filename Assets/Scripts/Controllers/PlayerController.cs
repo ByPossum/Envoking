@@ -78,6 +78,8 @@ public class PlayerController : Controller
         // Petting Dog Check (This code needs to run on Group A and not on Group B)
         if (bi_input.Special && CheckExclusiveActions())
             StrokeDog();
+        if (transform.position.y < -10f)
+            transform.position = v_currentSpawn;
     }
 
     private void FixedUpdate()

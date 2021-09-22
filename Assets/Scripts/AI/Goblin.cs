@@ -51,6 +51,8 @@ public class Goblin : Creature
                 nmp_followingPath = nmp_checkingPath;
             }
         }
+        if (transform.position.y < -10f)
+            Death();
     }
 
     private bool FindPointDistanceAwayFromPlayer()
