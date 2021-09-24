@@ -14,6 +14,7 @@ public class PlayerController : Controller
     private bool b_canPickup = true;
     private bool b_canFire = true;
     private bool b_shouldGroundCheck = false;
+    private bool b_paused = false;
     private int i_currentLives;
     private Vector3 v_currentSpawn;
     private Collider col;
@@ -33,6 +34,8 @@ public class PlayerController : Controller
     [SerializeField] private Transform v_pickupTransform;
     [SerializeField] private GameObject go_bullet;
     [SerializeField] private GameObject go_damageParticles;
+    [SerializeField] private GameObject go_pauseScreen;
+    [SerializeField] private GameObject go_buttonActivations;
     [SerializeField] private Transform t_petPoint;
     [SerializeField] private Camera cam;
     [SerializeField] private LayerMask lm_pickupLayers;
@@ -56,7 +59,7 @@ public class PlayerController : Controller
         v_currentSpawn = v_defaultRespawn;
         i_currentLives = i_MAXLIVES;
         f_health = f_maxHealth;
-        Physics.IgnoreLayerCollision(gameObject.layer, (int)Mathf.Log(lm_ignoreLayer.value,2f));
+        Physics.IgnoreLayerCollision(gameObject.layer, Utils.LMToInt(lm_ignoreLayer.value));
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -81,7 +84,14 @@ public class PlayerController : Controller
         if (bi_input.Special && CheckExclusiveActions())
             StrokeDog();
         if (transform.position.y < -10f)
+        {
             transform.position = v_currentSpawn;
+            TakeDamage(1f);
+        }
+        if (bi_input.Pause)
+        {
+            Pause();
+        }
     }
 
     private void FixedUpdate()
@@ -90,10 +100,12 @@ public class PlayerController : Controller
         {
             // Mouse based rotation
             RaycastHit hit;
-            Physics.Raycast(cam.ScreenPointToRay(bi_input.Look), out hit);
+            Physics.Raycast(cam.ScreenPointToRay(bi_input.Look), out hit, Mathf.Infinity, lm_groundChecker);
             Vector3 lookPoint = hit.point;
             lookPoint.y = 0.0f;
-            transform.rotation = Quaternion.LookRotation(lookPoint - Vector3.Scale(transform.position, Vector3.one - Vector3.up));
+            lookPoint = lookPoint - Vector3.Scale(transform.position, Vector3.one - Vector3.up);
+            Debug.DrawRay(transform.position + Vector3.up * 2, lookPoint * 20, Color.red);
+            transform.rotation = Quaternion.LookRotation(lookPoint);
             // Jump Check (Happens in FixedUpdate due to applying force within an animation event)
             if (bi_input.Jump && b_canJump && CheckExclusiveActions())
             {
@@ -128,6 +140,24 @@ public class PlayerController : Controller
             else if(CheckExclusiveActions())
                 pa_currentAction = PlayerAction.idle;
         }
+    }
+    /// <summary>
+    /// Pauses and unpauses the game
+    /// </summary>
+    private void Pause()
+    {
+        if (b_paused)
+        {
+            Time.timeScale = 1f;
+            b_paused = false;
+        }
+        else
+        {
+            Time.timeScale = Mathf.Epsilon;
+            b_paused = true;
+        }
+        go_buttonActivations.SetActive(b_paused);
+        go_pauseScreen.SetActive(b_paused);
     }
 
     /// <summary>
@@ -203,7 +233,7 @@ public class PlayerController : Controller
     private void StrokeDog()
     {
         RaycastHit hit;
-        if(Physics.SphereCast(transform.position, 1f, transform.forward, out hit, 2f, lm_pickupLayers, QueryTriggerInteraction.Ignore))
+        if(Physics.SphereCast(transform.position, 1f, transform.forward, out hit, 2f, Utils.LMToInt(lm_pickupLayers), QueryTriggerInteraction.Ignore))
         {
             if (hit.collider.GetComponent<Dog>() != null)
             {

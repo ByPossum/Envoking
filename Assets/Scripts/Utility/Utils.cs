@@ -23,4 +23,14 @@ public static class Utils
     {
         return new Vector3(Random.Range(minX, maxX), Random.Range(minY, maxY), Random.Range(minZ, maxZ));
     }
+
+    /// <summary>
+    /// Converts Layer Mask to Int
+    /// </summary>
+    /// <param name="_layer">LayerMask to convert</param>
+    /// <returns>Converted int</returns>
+    public static int LMToInt(LayerMask _layer)
+    {
+        return (int)Mathf.Log(_layer,2f);
+    }
 }

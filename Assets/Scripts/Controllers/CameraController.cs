@@ -12,6 +12,7 @@ public class CameraController : MonoBehaviour
     [SerializeField] private Slider sl_healthBar;
     [SerializeField] private float f_cameraSpeed;
     [SerializeField] private GameObject go_deathMask;
+    [SerializeField] private GameObject go_buttons;
 
     // Update is called once per frame
     void Update()
@@ -20,7 +21,10 @@ public class CameraController : MonoBehaviour
         transform.position = Vector3.Lerp(transform.position, pa_controller.transform.position + (pa_controller.CurrentAction == PlayerAction.walking ? v_walkingOffset : v_offset), f_cameraSpeed);
         // Show death screen when player dies
         if (pa_controller.CurrentAction == PlayerAction.gameOver)
+        {
             go_deathMask.SetActive(true);
+            go_buttons.SetActive(true);
+        }
         // Update healthbar
         sl_healthBar.value = pa_controller.CurrentHealth / pa_controller.MaxHealth;
     }
@@ -31,8 +35,8 @@ public class CameraController : MonoBehaviour
     public void RestartGame()
     {
         UniversalOverlord.x.ClearManagers();
-        Scene reloaded = SceneManager.GetActiveScene();
-        SceneManager.LoadScene(reloaded.name);
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
     /// <summary>
     /// Called from button. Returns to consent form.
@@ -40,5 +44,6 @@ public class CameraController : MonoBehaviour
     public void QuitGame()
     {
         SceneManager.LoadScene("ConsentForm");
+        Time.timeScale = 1f;
     }
 }

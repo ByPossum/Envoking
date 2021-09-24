@@ -9,9 +9,11 @@ public class BaseInput : MonoBehaviour
     protected Vector3 v_action;
     protected bool b_special;
     protected bool b_jump;
+    protected bool b_pause;
     public Vector3 Movement { get { return v_movement; } }
     public Vector3 Look { get { return v_looking; } }
     public Vector3 Actions { get { return v_action; } } 
     public bool Special { get { return b_special; } }
     public bool Jump { get { return b_jump; } }
+    public bool Pause { get { return b_pause; } }
 }

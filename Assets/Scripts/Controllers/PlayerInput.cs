@@ -19,6 +19,7 @@ public class PlayerInput : BaseInput
         v_action.z = Input.GetButtonDown("Fire3") ? 1f : 0f;
         b_special = Input.GetButtonDown("Submit");
         b_jump = Input.GetButtonDown("Jump");
+        b_pause = Input.GetButtonDown("Cancel");
     }
     public void NoJump()
     {

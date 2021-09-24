@@ -11,6 +11,7 @@ public class PoolManager : Manager
     /// </summary>
     public override void Init()
     {
+        Debug.Log("INIT");
         foreach (PoolObjectQuantity poolable in poq_poolsToGenerate)
         {
             if (poolable.go_poolable.GetComponent<Poolable>() != null || poolable.go_poolable.GetComponentInChildren<Poolable>() != null)
@@ -85,7 +86,16 @@ public class PoolManager : Manager
     public void DestroyPools()
     {
         // Let previous objects be garbage collected
+        foreach(Pool poolMarked in D_pools.Values)
+        {
+            poolMarked.KillAllObjects(transform.position);
+            foreach(Poolable poolable in poolMarked.GetPoolables())
+            {
+                Destroy(poolable.gameObject);
+            }
+        }
+        //foreach()
         D_pools.Clear();
-        poq_poolsToGenerate = new PoolObjectQuantity[0];
+        //D_pools = new Dictionary<string, Pool>();
     }
 }

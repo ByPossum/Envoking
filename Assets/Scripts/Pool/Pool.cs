@@ -52,6 +52,14 @@ public class Pool : MonoBehaviour
             objToKill.Die(Vector3.zero);
     }
 
+    public void KillAllObjects(Vector3 pos)
+    {
+        foreach(Poolable dirty in pool_objects)
+        {
+            dirty.Die(pos);
+        }
+    }
+
     public int ObjectCount()
     {
         int activeObjects = 0;

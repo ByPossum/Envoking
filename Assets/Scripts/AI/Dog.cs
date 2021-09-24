@@ -187,6 +187,7 @@ public class Dog : Creature, IPickupable
             Vector3 unitVec = Utils.RandomVector3(1f, 0, 1f, true);
             Vector3 enemyPos = cr_enemy.transform.position;
             unitVec = (enemyPos - transform.position).normalized * Mathf.Abs(unitVec.x) + (Vector3.Cross(Vector3.up, enemyPos - transform.position).normalized * unitVec.z) * 0.7f;
+            nmp_followingPath = new NavMeshPath();
             NavMesh.CalculatePath(transform.position, (unitVec.normalized * Random.Range(1f, f_playerDistance)) + enemyPos, 1, nmp_followingPath);
             nmp_followingPath = nmp_checkingPath;
             enemyPos = enemyPos - transform.position;

@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class UniversalOverlord : MonoBehaviour
 {
@@ -9,19 +10,32 @@ public class UniversalOverlord : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        if (x != null)
-            Destroy(this);
+        if (x != null && x != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
         else
         {
             x = this;
             DontDestroyOnLoad(this);
         }
 
+        RefreashManagers();
+        SceneManager.sceneLoaded += SceneInit;
+    }
+
+    private void RefreashManagers()
+    {
         foreach (Manager man in A_managers)
         {
             man.Init();
         }
-        Debug.Log("Started Again");
+    }
+
+    public void SceneInit(Scene _restart, LoadSceneMode _mode)
+    {
+        RefreashManagers();
     }
 
     public T GetManager<T>(ManagerTypes _managerToGet) where T : Manager
