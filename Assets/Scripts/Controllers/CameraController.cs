@@ -16,18 +16,27 @@ public class CameraController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        // Zoom the camera into the correct offset
         transform.position = Vector3.Lerp(transform.position, pa_controller.transform.position + (pa_controller.CurrentAction == PlayerAction.walking ? v_walkingOffset : v_offset), f_cameraSpeed);
+        // Show death screen when player dies
         if (pa_controller.CurrentAction == PlayerAction.gameOver)
             go_deathMask.SetActive(true);
+        // Update healthbar
         sl_healthBar.value = pa_controller.CurrentHealth / pa_controller.MaxHealth;
     }
 
+    /// <summary>
+    /// Called from button. Refreshes active scene.
+    /// </summary>
     public void RestartGame()
     {
         UniversalOverlord.x.ClearManagers();
         Scene reloaded = SceneManager.GetActiveScene();
         SceneManager.LoadScene(reloaded.name);
     }
+    /// <summary>
+    /// Called from button. Returns to consent form.
+    /// </summary>
     public void QuitGame()
     {
         SceneManager.LoadScene("ConsentForm");

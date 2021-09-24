@@ -142,7 +142,7 @@ public class Dog : Creature, IPickupable
             if(nmp_checkingPath.status == NavMeshPathStatus.PathComplete)
             {
                 playerPos = playerPos - transform.position;
-                playerPos = new Vector3(playerPos.x, 0f, playerPos.z);
+                playerPos.y = 0f;
                 transform.rotation = Quaternion.LookRotation(playerPos);
                 nmp_followingPath = nmp_checkingPath;
                 return true;
@@ -190,7 +190,7 @@ public class Dog : Creature, IPickupable
             NavMesh.CalculatePath(transform.position, (unitVec.normalized * Random.Range(1f, f_playerDistance)) + enemyPos, 1, nmp_followingPath);
             nmp_followingPath = nmp_checkingPath;
             enemyPos = enemyPos - transform.position;
-            enemyPos = new Vector3(enemyPos.x, 0f, enemyPos.z);
+            enemyPos.y = 0f;
             transform.rotation = Quaternion.LookRotation(enemyPos);
             return true;
         }

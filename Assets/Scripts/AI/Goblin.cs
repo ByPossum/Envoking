@@ -84,7 +84,7 @@ public class Goblin : Creature
         {
             v_shootingPos = playerPos;
             Vector3 rot = playerPos - transform.position;
-            rot = new Vector3(rot.x, 0f, rot.z);
+            rot.y = 0f;
             transform.rotation = Quaternion.LookRotation(rot);
             rb.velocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;

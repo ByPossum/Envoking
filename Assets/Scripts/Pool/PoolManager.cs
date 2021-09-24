@@ -6,7 +6,9 @@ public class PoolManager : Manager
 {
     [SerializeField] private PoolObjectQuantity[] poq_poolsToGenerate;
     private Dictionary<string, Pool> D_pools = new Dictionary<string, Pool>();
-    // Start is called before the first frame update
+    /// <summary>
+    /// Creates pools and populates them
+    /// </summary>
     public override void Init()
     {
         foreach (PoolObjectQuantity poolable in poq_poolsToGenerate)
@@ -19,7 +21,12 @@ public class PoolManager : Manager
             }
         }
     }
-
+    /// <summary>
+    /// Sets object active in scene and positions it at set location.
+    /// </summary>
+    /// <param name="_poolName">Pool to get object from</param>
+    /// <param name="_start">Position to start the object</param>
+    /// <returns>Object being spawned</returns>
     public GameObject SpawnObject(string _poolName, Vector3 _start)
     {
         foreach(string poolNames in D_pools.Keys)
@@ -36,18 +43,27 @@ public class PoolManager : Manager
         return null;
     }
 
+    /// <summary>
+    /// Sets object active in scene and positions it at set location and rotation
+    /// </summary>
+    /// <param name="_poolName">Pool to get object from</param>
+    /// <param name="_start">Position to start the object</param>
+    /// <param name="_rotation">Rotation to start the object</param>
+    /// <returns>Object being spawned</returns>
     public GameObject SpawnObject(string _poolName, Vector3 _start, Quaternion _rotation)
     {
         GameObject obj = SpawnObject(_poolName, _start);
         if (obj == null)
         {
-            Debug.Log("Not returning object");
             return null;
         }
         obj.transform.rotation = _rotation;
         return obj;
     }
-
+    /// <summary>
+    /// Returns object into pool
+    /// </summary>
+    /// <param name="_pooledObject">Object to return</param>
     public void ReturnToPool(GameObject _pooledObject)
     {
         Pool obtainedPool = D_pools[_pooledObject.name];

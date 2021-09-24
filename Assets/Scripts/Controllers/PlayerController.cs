@@ -13,6 +13,7 @@ public class PlayerController : Controller
     private bool b_canJump = true;
     private bool b_canPickup = true;
     private bool b_canFire = true;
+    private bool b_shouldGroundCheck = false;
     private int i_currentLives;
     private Vector3 v_currentSpawn;
     private Collider col;
@@ -99,6 +100,21 @@ public class PlayerController : Controller
                 pa_anim.SetAnimTrigger("Jump");
                 b_canJump = false;
                 pa_currentAction = PlayerAction.jumping;
+                StartCoroutine(GroundCheckTime());
+            }
+            else if (!b_canJump)
+            {
+                // Check if there is an object beneath the player
+                RaycastHit groundCheck;
+                if(Physics.Raycast(transform.position, Vector3.down, out groundCheck, 0.2f))
+                {
+                    if (!groundCheck.collider.GetComponent<PlayerController>())
+                    {
+                        b_canJump = true;
+                        pa_anim.SetAnimTrigger("Fall");
+                        b_shouldGroundCheck = false;
+                    }
+                }
             }
             // Movement
             rb.AddForce((bi_input.Movement.normalized * Time.deltaTime) * f_movementSpeed, ForceMode.Impulse);
@@ -121,7 +137,7 @@ public class PlayerController : Controller
     {
         // Get bullet from the pool
         PoolManager pm = UniversalOverlord.x.GetManager<PoolManager>(ManagerTypes.PoolManager);
-        GameObject bull = pm.SpawnObject(go_bullet.name, transform.position + (transform.forward), Quaternion.identity);
+        GameObject bull = pm.SpawnObject(go_bullet.name, transform.position + (transform.forward) * 1.5f, Quaternion.identity);
         // Apply force to bullet
         bull.GetComponent<Rigidbody>().AddForce(transform.forward * 20f, ForceMode.Impulse);
         bull.GetComponent<Bullet>().SetOwner(bi_input);
@@ -295,6 +311,12 @@ public class PlayerController : Controller
     public void ReturnToIdle()
     {
         pa_currentAction = PlayerAction.idle;
+    }
+
+    private IEnumerator GroundCheckTime()
+    {
+        yield return new WaitForSeconds(0.3f);
+        b_shouldGroundCheck = true;
     }
 
     public IEnumerator PetDog(Dog _dogToPet)
