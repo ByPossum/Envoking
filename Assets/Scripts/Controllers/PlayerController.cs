@@ -31,6 +31,7 @@ public class PlayerController : Controller
     [SerializeField] private float f_jumpForce;
     [SerializeField] private Transform v_pickupTransform;
     [SerializeField] private GameObject go_bullet;
+    [SerializeField] private GameObject go_damageParticles;
     [SerializeField] private Transform t_petPoint;
     [SerializeField] private Camera cam;
     [SerializeField] private LayerMask lm_pickupLayers;
@@ -113,30 +114,44 @@ public class PlayerController : Controller
         }
     }
 
+    /// <summary>
+    /// Called from animation. Spawns a bullet and fires it forwards
+    /// </summary>
     private void Attack()
     {
+        // Get bullet from the pool
         PoolManager pm = UniversalOverlord.x.GetManager<PoolManager>(ManagerTypes.PoolManager);
         GameObject bull = pm.SpawnObject(go_bullet.name, transform.position + (transform.forward), Quaternion.identity);
+        // Apply force to bullet
         bull.GetComponent<Rigidbody>().AddForce(transform.forward * 20f, ForceMode.Impulse);
         bull.GetComponent<Bullet>().SetOwner(bi_input);
+        // Manage cooldown
         b_canFire = false;
         StartCoroutine(FireCooldown());
     }
 
+    /// <summary>
+    /// Lets player pick up and throw objects
+    /// </summary>
     private void Pickup()
     {
         switch (pa_currentAction)
         {
             case PlayerAction.holding:
+                // If they player isn't holding an object, just reset to idle
                 if(go_heldObject != null)
                 {
+                    // play throwing animation
                     pa_anim.SetAnimTrigger("Throw");
                     pa_anim.SetAnimBool("Carry", false);
+                    // Unparent the player from the object and turn its collider back on
                     go_heldObject.transform.parent = null;
                     go_heldObject.GetComponent<Collider>().isTrigger = false;
+                    // Apply force to the object
                     Rigidbody heldObjRb = go_heldObject.GetComponent<Rigidbody>();
                     heldObjRb.isKinematic = false;
                     heldObjRb.AddForce(transform.forward * f_throwForce, ForceMode.Impulse);
+                    // Let to object be "thrown" and unreference the object
                     go_heldObject.GetComponent<IPickupable>().Throw();
                     go_heldObject = null;
                 }
@@ -148,10 +163,13 @@ public class PlayerController : Controller
                 {
                     if (hit.transform.GetComponent<IPickupable>() != null)
                     {
+                        // Play carry animation
                         pa_anim.SetAnimBool("Carry", true);
                         pa_anim.SetAnimLayerWeight(1, 1);
+                        // Run pickup commands on the object
                         hit.transform.GetComponent<IPickupable>().Pickup();
                         hit.transform.position = v_pickupTransform.position;
+                        // Set the object as a child of the player
                         go_heldObject = hit.transform.gameObject;
                         go_heldObject.GetComponent<Rigidbody>().isKinematic = true;
                         go_heldObject.GetComponent<Collider>().isTrigger = true;
@@ -161,6 +179,7 @@ public class PlayerController : Controller
                 pa_currentAction = PlayerAction.holding;
                 break;
         }
+        // The player cannot run this function again for a little bit
         b_canPickup = false;
         StartCoroutine(PickupCooldown());
     }
@@ -172,7 +191,8 @@ public class PlayerController : Controller
         {
             if (hit.collider.GetComponent<Dog>() != null)
             {
-            pa_currentAction = PlayerAction.stroking;
+                pa_currentAction = PlayerAction.stroking;
+                pa_anim.ResetAnimValues();
                 StartCoroutine(PetDog(hit.collider.GetComponent<Dog>()));
             }
         }
@@ -226,7 +246,10 @@ public class PlayerController : Controller
     public void TakeDamage(float _damage)
     {
         f_health -= _damage;
-        if(f_health <= 0f)
+        go_damageParticles.SetActive(true);
+        StopCoroutine(StopDamageParticles());
+        StartCoroutine(StopDamageParticles());
+        if(f_health <= 0f && pa_currentAction != PlayerAction.dead)
         {
             pa_anim.SetAnimLayerWeight(1, 0f);
             pa_anim.SetAnimTrigger("Death");
@@ -279,13 +302,25 @@ public class PlayerController : Controller
         rb.velocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
         _dogToPet.Pet(t_petPoint.position, -transform.forward);
-        while (!_dogToPet.InPetPosition)
+        bool interrupted = _dogToPet.CurrentAction == DogActions.damaged || pa_currentAction == PlayerAction.damaged;
+        while (!_dogToPet.InPetPosition || interrupted)
         {
             yield return new WaitForEndOfFrame();
         }
-        pa_anim.SetAnimTrigger("Pet");
+        if (!interrupted)
+        {
+            pa_anim.SetAnimTrigger("Pet");
+        }
+        else
+        {
+            _dogToPet.InterruptPetting();
+        }
     }
-
+    private IEnumerator StopDamageParticles()
+    {
+        yield return new WaitForSeconds(1f);
+        go_damageParticles.SetActive(false);
+    }
 }
 
 public enum PlayerAction
@@ -297,6 +332,7 @@ public enum PlayerAction
     shooting,
     holding,
     stroking,
+    damaged,
     dead,
     gameOver
 }

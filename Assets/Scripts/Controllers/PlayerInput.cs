@@ -14,11 +14,11 @@ public class PlayerInput : BaseInput
         v_looking.x = Input.mousePosition.x;
         v_looking.y = Input.mousePosition.y;
         v_looking.z = Input.mouseScrollDelta.x;
-        v_action.x = Input.GetAxis("Fire1");
-        v_action.y = Input.GetAxis("Fire2");
-        v_action.z = Input.GetAxis("Fire3");
+        v_action.x = Input.GetButtonDown("Fire1") ? 1f : 0f;
+        v_action.y = Input.GetButtonDown("Fire2") ? 1f : 0f;
+        v_action.z = Input.GetButtonDown("Fire3") ? 1f : 0f;
         b_special = Input.GetButtonDown("Submit");
-        b_jump = Input.GetAxis("Jump") > 0f ? true : false;
+        b_jump = Input.GetButtonDown("Jump");
     }
     public void NoJump()
     {

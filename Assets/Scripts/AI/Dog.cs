@@ -10,6 +10,7 @@ public class Dog : Creature, IPickupable
     private const float f_heartTime = 1.5f;
 
     private bool b_inPetPosition = false;
+    private bool b_petInterrupt = false;
     [SerializeField] private float f_attackCoolDown;
     [SerializeField] private float f_hitBoxTimer;
     [SerializeField] private float f_attackForce;
@@ -107,8 +108,8 @@ public class Dog : Creature, IPickupable
     {
         switch (da_currentAction)
         {
-            //case DogActions.attackEnemy:
-            //    return true;
+            case DogActions.attackEnemy:
+                return true;
             case DogActions.pickedUp:
                 return true;
             case DogActions.stay:
@@ -140,6 +141,9 @@ public class Dog : Creature, IPickupable
         {
             if(nmp_checkingPath.status == NavMeshPathStatus.PathComplete)
             {
+                playerPos = playerPos - transform.position;
+                playerPos = new Vector3(playerPos.x, 0f, playerPos.z);
+                transform.rotation = Quaternion.LookRotation(playerPos);
                 nmp_followingPath = nmp_checkingPath;
                 return true;
             }
@@ -170,7 +174,7 @@ public class Dog : Creature, IPickupable
         // If there are no available goblins, action cannot be completed
         if(allGoblinPos.Count < 1)
             return false;
-        // Find closest goblin. TODO: Add max distance from player or something.
+        // Find closest goblin.
         foreach(Vector3 goblinPos in allGoblinPos)
         {
             if (Vector3.Distance(transform.position, goblinPos) < smallestValueIndex.dist)
@@ -185,6 +189,9 @@ public class Dog : Creature, IPickupable
             unitVec = (enemyPos - transform.position).normalized * Mathf.Abs(unitVec.x) + (Vector3.Cross(Vector3.up, enemyPos - transform.position).normalized * unitVec.z) * 0.7f;
             NavMesh.CalculatePath(transform.position, (unitVec.normalized * Random.Range(1f, f_playerDistance)) + enemyPos, 1, nmp_followingPath);
             nmp_followingPath = nmp_checkingPath;
+            enemyPos = enemyPos - transform.position;
+            enemyPos = new Vector3(enemyPos.x, 0f, enemyPos.z);
+            transform.rotation = Quaternion.LookRotation(enemyPos);
             return true;
         }
         return false;
@@ -275,10 +282,20 @@ public class Dog : Creature, IPickupable
         da_currentAction = DogActions.none;
     }
 
+    public void InterruptPetting()
+    {
+        b_petInterrupt = true;
+    }
+
     public void TurnLoveHeartsOn()
     {
         go_loveHearts.SetActive(true);
         StartCoroutine(TurnOffHearts());
+    }
+
+    public override void TakeDamage(float _damage)
+    {
+        da_currentAction = DogActions.damaged;
     }
 
     public IEnumerator GetPet(Vector3 _posToMoveTo, Vector3 _rot)
@@ -288,16 +305,21 @@ public class Dog : Creature, IPickupable
         _posToMoveTo = new Vector3(_posToMoveTo.x, transform.position.y, _posToMoveTo.z);
         float journey = Vector3.Distance(startPoint, _posToMoveTo);
         transform.rotation = Quaternion.LookRotation(_rot);
-        while(transform.position != _posToMoveTo)
+        bool interupt = b_petInterrupt || da_currentAction == DogActions.damaged;
+        while(transform.position != _posToMoveTo || interupt)
         {
             float distance = (Time.time - startTime) * f_petTransitionSpeed;
             float t = distance / journey;
             transform.position = Vector3.Lerp(startPoint, _posToMoveTo, t);
             yield return new WaitForEndOfFrame();
         }
-        rb.angularVelocity = Vector3.zero;
-        rb.velocity = Vector3.zero;
-        da_anim.SetAnimTrigger("Pet");
+        if (!interupt)
+        {
+            rb.angularVelocity = Vector3.zero;
+            rb.velocity = Vector3.zero;
+            da_anim.SetAnimTrigger("Pet");
+        }
+        b_petInterrupt = false;
     }
 
     public IEnumerator TurnOffHearts()
@@ -305,6 +327,7 @@ public class Dog : Creature, IPickupable
         yield return new WaitForSeconds(f_heartTime);
         go_loveHearts.SetActive(false);
     }
+
 }
 
 public enum DogActions
@@ -316,6 +339,7 @@ public enum DogActions
     findInteractable,
     interact,
     pickedUp,
+    damaged,
     stay,
     Pet
 }

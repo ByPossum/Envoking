@@ -24,7 +24,7 @@ public class CameraController : MonoBehaviour
 
     public void RestartGame()
     {
-        Debug.Log("I get called");
+        UniversalOverlord.x.ClearManagers();
         Scene reloaded = SceneManager.GetActiveScene();
         SceneManager.LoadScene(reloaded.name);
     }

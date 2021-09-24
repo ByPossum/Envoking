@@ -577,7 +577,7 @@ MonoBehaviour:
   v_offset: {x: 0, y: 15, z: -12}
   v_walkingOffset: {x: 0, y: 30, z: -24}
   sl_healthBar: {fileID: 2362796769364411612}
-  f_cameraSpeed: 0.01
+  f_cameraSpeed: 0.1
   go_deathMask: {fileID: 3291701723100484847}
 --- !u!1 &5488443020662920026
 GameObject:

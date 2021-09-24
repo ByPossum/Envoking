@@ -9,7 +9,6 @@ public class PoolManager : Manager
     // Start is called before the first frame update
     public override void Init()
     {
-        DontDestroyOnLoad(this);
         foreach (PoolObjectQuantity poolable in poq_poolsToGenerate)
         {
             if (poolable.go_poolable.GetComponent<Poolable>() != null || poolable.go_poolable.GetComponentInChildren<Poolable>() != null)
@@ -66,5 +65,11 @@ public class PoolManager : Manager
     public Poolable[] GetObjectCollection(GameObject _pooledObject)
     {
         return GetObjectCollection(_pooledObject.name);
+    }
+    public void DestroyPools()
+    {
+        // Let previous objects be garbage collected
+        D_pools.Clear();
+        poq_poolsToGenerate = new PoolObjectQuantity[0];
     }
 }

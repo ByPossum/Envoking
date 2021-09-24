@@ -9,9 +9,6 @@ public class UniversalOverlord : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        foreach (Manager man in A_managers)
-            man.Init();
-
         if (x != null)
             Destroy(this);
         else
@@ -19,6 +16,12 @@ public class UniversalOverlord : MonoBehaviour
             x = this;
             DontDestroyOnLoad(this);
         }
+
+        foreach (Manager man in A_managers)
+        {
+            man.Init();
+        }
+        Debug.Log("Started Again");
     }
 
     public T GetManager<T>(ManagerTypes _managerToGet) where T : Manager
@@ -36,5 +39,9 @@ public class UniversalOverlord : MonoBehaviour
     public Manager GetManager(int _id)
     {
         return A_managers[_id];
+    }
+    public void ClearManagers()
+    {
+        GetManager<PoolManager>(ManagerTypes.PoolManager).DestroyPools();
     }
 }
