@@ -11,7 +11,7 @@ public class Bullet : MonoBehaviour
 
     public void Start()
     {
-        Physics.IgnoreLayerCollision(gameObject.layer, (int)Mathf.Log(lm_ignoreLayer, 2));
+        Physics.IgnoreLayerCollision(gameObject.layer, Utils.LMToInt(lm_ignoreLayer));
     }
 
     public void SetOwner(BaseInput _newOwner)

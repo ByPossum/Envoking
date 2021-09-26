@@ -34,7 +34,7 @@ public class AIController : Controller
                 if(cr_owner.FollowingPath.corners.Length > 1)
                 {
                     nmp_pathToFollow = cr_owner.FollowingPath;
-                    rb.AddForce((nmp_pathToFollow.corners[1] - transform.position).normalized, ForceMode.Impulse);
+                    rb.AddForce(Vector3.Scale(nmp_pathToFollow.corners[1] - transform.position, Vector3.one - Vector3.up).normalized, ForceMode.Impulse);
                     Vector3 direction = Vector3.Scale((nmp_pathToFollow.corners[1] - transform.position).normalized, Vector3.one - Vector3.up);
                     if (direction.magnitude > 0.5f)
                         transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(direction), 0.3f);

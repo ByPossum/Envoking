@@ -29,6 +29,7 @@ public class PlayerController : Controller
     [SerializeField] private float f_movementSpeed;
     [SerializeField] private float f_rotateSpeed;
     [SerializeField] private float f_shotSpeed;
+    [SerializeField] private float f_pickupSpeed;
     [SerializeField] private float f_throwForce;
     [SerializeField] private float f_jumpForce;
     [SerializeField] private Transform v_pickupTransform;
@@ -80,9 +81,11 @@ public class PlayerController : Controller
         // Pickup Check
         if (bi_input.Actions.y > 0 && b_canPickup)
             Pickup();
+#if GROUPA
         // Petting Dog Check (This code needs to run on Group A and not on Group B)
         if (bi_input.Special && CheckExclusiveActions())
             StrokeDog();
+#endif
         if (transform.position.y < -10f)
         {
             transform.position = v_currentSpawn;
@@ -104,9 +107,10 @@ public class PlayerController : Controller
             Vector3 lookPoint = hit.point;
             lookPoint.y = 0.0f;
             lookPoint = lookPoint - Vector3.Scale(transform.position, Vector3.one - Vector3.up);
-            Debug.DrawRay(transform.position + Vector3.up * 2, lookPoint * 20, Color.red);
+            //Debug.DrawRay(transform.position + Vector3.up * 2, lookPoint * 20, Color.red);
             transform.rotation = Quaternion.LookRotation(lookPoint);
             // Jump Check (Happens in FixedUpdate due to applying force within an animation event)
+            //Debug.Log(b_canJump + " " + CheckExclusiveActions());
             if (bi_input.Jump && b_canJump && CheckExclusiveActions())
             {
                 pa_anim.SetAnimTrigger("Jump");
@@ -114,11 +118,12 @@ public class PlayerController : Controller
                 pa_currentAction = PlayerAction.jumping;
                 StartCoroutine(GroundCheckTime());
             }
-            else if (!b_canJump)
+            else if (!b_canJump && b_shouldGroundCheck)
             {
                 // Check if there is an object beneath the player
                 RaycastHit groundCheck;
-                if(Physics.Raycast(transform.position, Vector3.down, out groundCheck, 0.2f))
+
+                if(Physics.Raycast(transform.position + Vector3.up *0.1f, Vector3.down, out groundCheck, 0.3f))
                 {
                     if (!groundCheck.collider.GetComponent<PlayerController>())
                     {
@@ -181,49 +186,47 @@ public class PlayerController : Controller
     /// </summary>
     private void Pickup()
     {
-        switch (pa_currentAction)
+        pa_anim.SetAnimLayerWeight(1, 1);
+        Debug.Log(pa_currentAction);
+        if (go_heldObject != null)
         {
-            case PlayerAction.holding:
-                // If they player isn't holding an object, just reset to idle
-                if(go_heldObject != null)
+            // play throwing animation
+            pa_anim.SetAnimBool("Carry", false);
+            pa_anim.SetAnimTrigger("Throw");
+            // Unparent the player from the object and turn its collider back on
+            go_heldObject.transform.parent = null;
+            go_heldObject.GetComponent<Collider>().isTrigger = false;
+            // Apply force to the object
+            Rigidbody heldObjRb = go_heldObject.GetComponent<Rigidbody>();
+            heldObjRb.isKinematic = false;
+            heldObjRb.AddForce(transform.forward * f_throwForce, ForceMode.Impulse);
+            // Let to object be "thrown" and unreference the object
+            go_heldObject.GetComponent<IPickupable>().Throw();
+            go_heldObject = null;
+            b_canPickup = false;
+            pa_currentAction = PlayerAction.throwing;
+            StartCoroutine(PickupCooldown());
+        }
+        else
+        {
+            RaycastHit hit;
+            if (Physics.SphereCast(transform.position, 1f, transform.forward, out hit, 2f, lm_pickupLayers))
+            {
+                if (hit.transform.GetComponent<IPickupable>() != null)
                 {
-                    // play throwing animation
-                    pa_anim.SetAnimTrigger("Throw");
-                    pa_anim.SetAnimBool("Carry", false);
-                    // Unparent the player from the object and turn its collider back on
-                    go_heldObject.transform.parent = null;
-                    go_heldObject.GetComponent<Collider>().isTrigger = false;
-                    // Apply force to the object
-                    Rigidbody heldObjRb = go_heldObject.GetComponent<Rigidbody>();
-                    heldObjRb.isKinematic = false;
-                    heldObjRb.AddForce(transform.forward * f_throwForce, ForceMode.Impulse);
-                    // Let to object be "thrown" and unreference the object
-                    go_heldObject.GetComponent<IPickupable>().Throw();
-                    go_heldObject = null;
+                    // Play carry animation
+                    pa_anim.SetAnimBool("Carry", true);
+                    // Run pickup commands on the object
+                    hit.transform.GetComponent<IPickupable>().Pickup();
+                    hit.transform.position = v_pickupTransform.position;
+                    // Set the object as a child of the player
+                    go_heldObject = hit.transform.gameObject;
+                    go_heldObject.GetComponent<Rigidbody>().isKinematic = true;
+                    go_heldObject.GetComponent<Collider>().isTrigger = true;
+                    go_heldObject.transform.parent = transform;
                 }
-                pa_currentAction = PlayerAction.idle;
-                break;
-            default:
-                RaycastHit hit;
-                if (Physics.SphereCast(transform.position, 1f, transform.forward, out hit, 2f, lm_pickupLayers))
-                {
-                    if (hit.transform.GetComponent<IPickupable>() != null)
-                    {
-                        // Play carry animation
-                        pa_anim.SetAnimBool("Carry", true);
-                        pa_anim.SetAnimLayerWeight(1, 1);
-                        // Run pickup commands on the object
-                        hit.transform.GetComponent<IPickupable>().Pickup();
-                        hit.transform.position = v_pickupTransform.position;
-                        // Set the object as a child of the player
-                        go_heldObject = hit.transform.gameObject;
-                        go_heldObject.GetComponent<Rigidbody>().isKinematic = true;
-                        go_heldObject.GetComponent<Collider>().isTrigger = true;
-                        go_heldObject.transform.parent = transform;
-                    }
-                }
-                pa_currentAction = PlayerAction.holding;
-                break;
+            }
+            pa_currentAction = PlayerAction.holding;
         }
         // The player cannot run this function again for a little bit
         b_canPickup = false;
@@ -233,7 +236,7 @@ public class PlayerController : Controller
     private void StrokeDog()
     {
         RaycastHit hit;
-        if(Physics.SphereCast(transform.position, 1f, transform.forward, out hit, 2f, Utils.LMToInt(lm_pickupLayers), QueryTriggerInteraction.Ignore))
+        if(Physics.SphereCast(transform.position, 1f, transform.forward, out hit, 2f, lm_pickupLayers, QueryTriggerInteraction.Ignore))
         {
             if (hit.collider.GetComponent<Dog>() != null)
             {
@@ -248,7 +251,11 @@ public class PlayerController : Controller
     {
         switch (pa_currentAction)
         {
+            case PlayerAction.shooting:
+                return false;
             case PlayerAction.holding:
+                return false;
+            case PlayerAction.throwing:
                 return false;
             case PlayerAction.stroking:
                 return false;
@@ -270,7 +277,7 @@ public class PlayerController : Controller
     }
     private IEnumerator PickupCooldown()
     {
-        yield return new WaitForSeconds(f_shotSpeed);
+        yield return new WaitForSeconds(f_pickupSpeed);
         b_canPickup = true;
     }
 
@@ -383,6 +390,7 @@ public enum PlayerAction
     jumping,
     shooting,
     holding,
+    throwing,
     stroking,
     damaged,
     dead,

@@ -10,5 +10,9 @@ public class RespawnPoint : MonoBehaviour
         {
             other.GetComponent<PlayerController>().SpawnPoint = transform.position;
         }
+        else if (other.GetComponent<Dog>())
+        {
+            other.GetComponent<Dog>().RespawnPoint = transform.position;
+        }
     }
 }

@@ -76,7 +76,7 @@ MonoBehaviour:
   f_maxHealth: 5
   f_minRadius: 7
   f_maxRadius: 40
-  f_shootingTime: 1
+  f_shootingTime: 1.5
   f_shootingForce: 20
   go_bullet: {fileID: 3935889583853675728, guid: 3fa1ff35d316e214eb20c7b10ef0d1d5, type: 3}
 --- !u!54 &4075935113498669043

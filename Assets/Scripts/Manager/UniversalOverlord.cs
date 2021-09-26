@@ -10,19 +10,10 @@ public class UniversalOverlord : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        if (x != null && x != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-        else
-        {
-            x = this;
-            DontDestroyOnLoad(this);
-        }
+
+        x = this;
 
         RefreashManagers();
-        SceneManager.sceneLoaded += SceneInit;
     }
 
     private void RefreashManagers()

@@ -204,10 +204,10 @@ MonoBehaviour:
     from the start of this experiment until submitting data. This means that should
     you wish to withdraw from the experiment, no data will be collected.\r\nShould
     you have any questions about the experiment, you can email Byron Crowhurst at:
-    BC216857@falmouth.ac.uk.\r\nShould you have any concerns about the experiment
-    you can contact the Falmouth Ethics Committee at: Research@Falmouth.ac.uk\r\nBy
-    clicking the 'I consent' button I have read and understood the information presented
-    in this form and consent to participating in this experiment.\r"
+    BC216857@falmouth.ac.uk\nShould you have any concerns about the experiment you
+    can contact the Falmouth Ethics Committee at: Research@Falmouth.ac.uk\r\nBy clicking
+    the 'I consent' button I have read and understood the information presented in
+    this form and consent to participating in this experiment.\r"
 --- !u!222 &207299979
 CanvasRenderer:
   m_ObjectHideFlags: 0

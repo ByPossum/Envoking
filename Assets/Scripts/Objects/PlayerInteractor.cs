@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ButtonObject : Interacters, IDogable, IUsable
+public class PlayerInteractor : Interacters, IUsable
 {
-
-
     public GameObject GetGameObject()
     {
         return gameObject;
@@ -13,7 +11,7 @@ public class ButtonObject : Interacters, IDogable, IUsable
 
     public override void Interact()
     {
-        transform.position = new Vector3(transform.position.x, -0.4f, transform.position.z);
+        GetComponent<Collider>().enabled = false;
         base.Interact();
     }
 

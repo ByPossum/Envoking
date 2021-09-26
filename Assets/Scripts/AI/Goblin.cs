@@ -38,7 +38,7 @@ public class Goblin : Creature
         }
         if (!b_incapacitated)
         {
-            if (ShootAtPlayer())
+            if (ShootAtPlayer() && !b_shootCooldown)
             {
                 ga_anim.SetAnimTrigger("Attack");
             }
@@ -95,13 +95,16 @@ public class Goblin : Creature
 
     public override void Attack()
     {
-        b_canAttack = false;
+        //b_canAttack = false;
         PoolManager pm = UniversalOverlord.x.GetManager<PoolManager>(ManagerTypes.PoolManager);
         GameObject bullet = pm.SpawnObject(go_bullet.name, transform.position + transform.forward.normalized, transform.rotation);
         
         Rigidbody bulrb = bullet.GetComponent<Rigidbody>();
         bulrb.AddForce((v_shootingPos - transform.position).normalized * f_shootingForce, ForceMode.Impulse);
         bullet.GetComponent<Bullet>().SetOwner(this);
+
+        b_shootCooldown = true;
+        StartCoroutine(ShootCooldown());
     }
 
     public override void TakeDamage(float _damage)
@@ -114,6 +117,12 @@ public class Goblin : Creature
         UniversalOverlord.x.GetManager<PoolManager>(ManagerTypes.PoolManager).ReturnToPool(gameObject);
         rb.velocity = Vector3.zero;
         hp = f_maxHealth;
+    }
+
+    public IEnumerator ShootCooldown()
+    {
+        yield return new WaitForSeconds(f_shootingTime);
+        b_shootCooldown = false;
     }
 }
 

@@ -11,6 +11,7 @@ public class Dog : Creature, IPickupable
 
     private bool b_inPetPosition = false;
     private bool b_petInterrupt = false;
+    private Vector3 v_respawnPoint;
     [SerializeField] private float f_attackCoolDown;
     [SerializeField] private float f_hitBoxTimer;
     [SerializeField] private float f_attackForce;
@@ -27,10 +28,12 @@ public class Dog : Creature, IPickupable
     public bool InPetPosition { get { return b_inPetPosition; } }
     public float AttackForce { get { return f_attackForce; } }
     public float AttackDamage { get { return f_attackDamage; } }
+    public Vector3 RespawnPoint { set { v_respawnPoint = value; } }
 
     protected override void Start()
     {
         base.Start();
+        v_respawnPoint = transform.position;
         da_anim = GetComponent<DogAnimator>();
     }
 
@@ -40,17 +43,17 @@ public class Dog : Creature, IPickupable
         if(!b_incapacitated && !CheckExclusiveActions())
         {
             CheckActionToPerform();
-
         }
+        if (transform.position.y < -10f)
+            transform.position = v_respawnPoint;
     }
 
     private void OnCollisionEnter(Collision collision)
     {
         if (b_incapacitated)
         {
-            if(collision.transform.gameObject.layer == Mathf.Log(lm_throwChecker.value,2))
+            if(collision.transform.gameObject.layer == Utils.LMToInt(lm_throwChecker.value))
             {
-                Debug.Log(collision.transform.name);
                 b_incapacitated = false;
             }
         }

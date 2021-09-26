@@ -11,7 +11,6 @@ public class PoolManager : Manager
     /// </summary>
     public override void Init()
     {
-        Debug.Log("INIT");
         foreach (PoolObjectQuantity poolable in poq_poolsToGenerate)
         {
             if (poolable.go_poolable.GetComponent<Poolable>() != null || poolable.go_poolable.GetComponentInChildren<Poolable>() != null)

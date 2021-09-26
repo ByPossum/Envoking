@@ -10,6 +10,10 @@ public class Spawner : MonoBehaviour
     [SerializeField] private List<GameObject> L_turnOn;
     [SerializeField] private List<GameObject> L_turnOff;
     // Update is called once per frame
+    public void Start()
+    {
+        i_totalNumber += i_minAliveAgents;
+    }
     void Update()
     {
         if (!CheckAliveMonsters())
@@ -25,8 +29,11 @@ public class Spawner : MonoBehaviour
     private void SpawnNewMonster()
     {
         if (i_totalNumber <= 0)
+        {
             Die();
-        UniversalOverlord.x.GetManager<PoolManager>(ManagerTypes.PoolManager).SpawnObject(go_monsterType.name, transform.position);
+        }
+        else if(i_totalNumber > i_minAliveAgents)
+            UniversalOverlord.x.GetManager<PoolManager>(ManagerTypes.PoolManager).SpawnObject(go_monsterType.name, transform.position);
         i_totalNumber--;
     }
 
