@@ -187,7 +187,6 @@ public class PlayerController : Controller
     private void Pickup()
     {
         pa_anim.SetAnimLayerWeight(1, 1);
-        Debug.Log(pa_currentAction);
         if (go_heldObject != null)
         {
             // play throwing animation

@@ -669,5 +669,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: VictoryCamera
       objectReference: {fileID: 0}
+    - target: {fileID: 3360243544356762369, guid: fd473e168f536e64a95feecebfc5c24d, type: 3}
+      propertyPath: m_Text
+      value: 'Please fill out the questionnaire.
+
+        You are part of Group A.'
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: fd473e168f536e64a95feecebfc5c24d, type: 3}
