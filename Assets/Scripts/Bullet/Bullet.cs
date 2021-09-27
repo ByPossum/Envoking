@@ -40,7 +40,7 @@ public class Bullet : MonoBehaviour
                     break;
             }
         }
-        else if (collision.transform.GetComponent<Bullet>())
+        else if (collision.transform.CompareTag("Wall"))
         {
             Die();
         }

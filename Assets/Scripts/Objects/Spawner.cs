@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Spawner : MonoBehaviour
 {
+    [SerializeField] private bool b_spent = false;
     [SerializeField] private int i_totalNumber;
     [SerializeField] private int i_minAliveAgents;
     [SerializeField] private GameObject go_monsterType;
@@ -16,8 +17,21 @@ public class Spawner : MonoBehaviour
     }
     void Update()
     {
-        if (!CheckAliveMonsters())
-            SpawnNewMonster();
+        if (i_totalNumber == i_minAliveAgents)
+            b_spent = true;
+        if (!CheckAliveMonsters() && !b_spent)
+        {
+            if(!b_spent)
+                SpawnNewMonster();
+        }
+        else if (!CheckAliveMonsters() && b_spent)
+        {
+            i_minAliveAgents--;
+            if (i_minAliveAgents == 0)
+            {
+                Die();
+            }
+        }
     }
 
     private bool CheckAliveMonsters()
@@ -28,12 +42,11 @@ public class Spawner : MonoBehaviour
     }
     private void SpawnNewMonster()
     {
-        if (i_totalNumber <= 0)
+
+        if(i_totalNumber > i_minAliveAgents && !b_spent)
         {
-            Die();
-        }
-        else if(i_totalNumber > i_minAliveAgents)
             UniversalOverlord.x.GetManager<PoolManager>(ManagerTypes.PoolManager).SpawnObject(go_monsterType.name, transform.position);
+        }
         i_totalNumber--;
     }
 

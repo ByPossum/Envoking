@@ -144,7 +144,6 @@ public class PlayerController : Controller
             RaycastHit groundCheck;
             if (Physics.Raycast(transform.position + Vector3.up * 0.1f, Vector3.down, out groundCheck, 0.3f, lm_ground))
             {
-                Debug.Log("HYAAAH");
                 if (!groundCheck.collider.GetComponent<PlayerController>())
                 {
                     b_canJump = true;
