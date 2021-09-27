@@ -115,6 +115,7 @@ public class Goblin : Creature
     public void Death()
     {
         UniversalOverlord.x.GetManager<PoolManager>(ManagerTypes.PoolManager).ReturnToPool(gameObject);
+        b_shootCooldown = false;
         rb.velocity = Vector3.zero;
         hp = f_maxHealth;
     }

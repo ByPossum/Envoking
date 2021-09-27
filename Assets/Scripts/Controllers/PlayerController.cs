@@ -15,6 +15,7 @@ public class PlayerController : Controller
     private bool b_canFire = true;
     private bool b_shouldGroundCheck = false;
     private bool b_paused = false;
+    private bool b_lavaDamage = false;
     private int i_currentLives;
     private Vector3 v_currentSpawn;
     private Collider col;
@@ -40,7 +41,8 @@ public class PlayerController : Controller
     [SerializeField] private Transform t_petPoint;
     [SerializeField] private Camera cam;
     [SerializeField] private LayerMask lm_pickupLayers;
-    [SerializeField] private LayerMask lm_groundChecker;
+    [SerializeField] private LayerMask lm_ground;
+    [SerializeField] private LayerMask lm_mouseLayer;
     [SerializeField] private LayerMask lm_ignoreLayer;
 
     public float CurrentHealth { get { return f_health; } }
@@ -95,6 +97,7 @@ public class PlayerController : Controller
         {
             Pause();
         }
+        Jumping();
     }
 
     private void FixedUpdate()
@@ -103,7 +106,7 @@ public class PlayerController : Controller
         {
             // Mouse based rotation
             RaycastHit hit;
-            Physics.Raycast(cam.ScreenPointToRay(bi_input.Look), out hit, Mathf.Infinity, lm_groundChecker);
+            Physics.Raycast(cam.ScreenPointToRay(bi_input.Look), out hit, Mathf.Infinity, lm_mouseLayer);
             Vector3 lookPoint = hit.point;
             lookPoint.y = 0.0f;
             lookPoint = lookPoint - Vector3.Scale(transform.position, Vector3.one - Vector3.up);
@@ -111,41 +114,47 @@ public class PlayerController : Controller
             transform.rotation = Quaternion.LookRotation(lookPoint);
             // Jump Check (Happens in FixedUpdate due to applying force within an animation event)
             //Debug.Log(b_canJump + " " + CheckExclusiveActions());
-            if (bi_input.Jump && b_canJump && CheckExclusiveActions())
-            {
-                pa_anim.SetAnimTrigger("Jump");
-                b_canJump = false;
-                pa_currentAction = PlayerAction.jumping;
-                StartCoroutine(GroundCheckTime());
-            }
-            else if (!b_canJump && b_shouldGroundCheck)
-            {
-                // Check if there is an object beneath the player
-                RaycastHit groundCheck;
-
-                if(Physics.Raycast(transform.position + Vector3.up *0.1f, Vector3.down, out groundCheck, 0.3f))
-                {
-                    if (!groundCheck.collider.GetComponent<PlayerController>())
-                    {
-                        b_canJump = true;
-                        pa_anim.SetAnimTrigger("Fall");
-                        b_shouldGroundCheck = false;
-                    }
-                }
-            }
+            
             // Movement
             rb.AddForce((bi_input.Movement.normalized * Time.deltaTime) * f_movementSpeed, ForceMode.Impulse);
-            rb.velocity = (bi_input.Movement != Vector3.zero || pa_currentAction == PlayerAction.jumping ? Vector3.ClampMagnitude(rb.velocity, 10f) : Vector3.zero + Physics.gravity);
+            rb.velocity = (bi_input.Movement != Vector3.zero || pa_currentAction == PlayerAction.lavaDamage || pa_currentAction == PlayerAction.jumping ? Vector3.ClampMagnitude(rb.velocity, 10f) : Vector3.zero + Physics.gravity);
             // Action Checking
             if (bi_input.Movement.x != 0.0f || bi_input.Movement.z != 0.0f && CheckExclusiveActions())
             {
                 pa_currentAction = PlayerAction.walking;
                 pa_anim.SetAnimFloat("WalkSpeed", Mathf.Abs(bi_input.Movement.x) >= 1 ? Mathf.Abs(bi_input.Movement.x) : Mathf.Abs(bi_input.Movement.z) >= 1 ? Mathf.Abs(bi_input.Movement.z) : 0.0f);
             }
-            else if(CheckExclusiveActions())
+            else if (CheckExclusiveActions())
                 pa_currentAction = PlayerAction.idle;
         }
     }
+
+    private void Jumping()
+    {
+        if (bi_input.Jump && b_canJump && CheckExclusiveActions())
+        {
+            pa_anim.SetAnimTrigger("Jump");
+            b_canJump = false;
+            pa_currentAction = PlayerAction.jumping;
+            StartCoroutine(GroundCheckTime());
+        }
+        else if (!b_canJump && b_shouldGroundCheck)
+        {
+            // Check if there is an object beneath the player
+            RaycastHit groundCheck;
+            if (Physics.Raycast(transform.position + Vector3.up * 0.1f, Vector3.down, out groundCheck, 0.3f, lm_ground))
+            {
+                Debug.Log("HYAAAH");
+                if (!groundCheck.collider.GetComponent<PlayerController>())
+                {
+                    b_canJump = true;
+                    pa_anim.SetAnimTrigger("Fall");
+                    b_shouldGroundCheck = false;
+                }
+            }
+        }
+    }
+
     /// <summary>
     /// Pauses and unpauses the game
     /// </summary>
@@ -314,6 +323,19 @@ public class PlayerController : Controller
         }
     }
 
+    public void LavaDamage(float _damage, float _lavaForce)
+    {
+        rb.velocity = Vector3.zero;
+        if (!b_lavaDamage)
+        {
+            pa_currentAction = PlayerAction.lavaDamage;
+            rb.AddForce(Vector3.up * _lavaForce, ForceMode.Impulse);
+            TakeDamage(_damage);
+            b_lavaDamage = true;
+            StartCoroutine(LavaTimer());
+        }
+    }
+
     public void ResetJump()
     {
         b_canJump = true;
@@ -355,6 +377,11 @@ public class PlayerController : Controller
         b_shouldGroundCheck = true;
     }
 
+   public IEnumerator LavaTimer()
+    {
+        yield return new WaitForSeconds(0.5f);
+        b_lavaDamage = false;
+    }
     public IEnumerator PetDog(Dog _dogToPet)
     {
         rb.velocity = Vector3.zero;
@@ -392,6 +419,7 @@ public enum PlayerAction
     throwing,
     stroking,
     damaged,
+    lavaDamage,
     dead,
     gameOver
 }

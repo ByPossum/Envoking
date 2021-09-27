@@ -12,6 +12,7 @@ public class PlayerInteractor : Interacters, IUsable
     public override void Interact()
     {
         GetComponent<Collider>().enabled = false;
+        FindObjectOfType<Dog>().transform.position = FindObjectOfType<PlayerController>().transform.position + Utils.RandomVector3(1f, true);
         base.Interact();
     }
 

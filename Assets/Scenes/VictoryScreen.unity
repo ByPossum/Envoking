@@ -673,7 +673,22 @@ PrefabInstance:
       propertyPath: m_Text
       value: 'Please fill out the questionnaire.
 
-        You are part of Group A.'
+        You are part of Group '
       objectReference: {fileID: 0}
+    - target: {fileID: 4691878818850055009, guid: fd473e168f536e64a95feecebfc5c24d, type: 3}
+      propertyPath: txt_groupText
+      value: 
+      objectReference: {fileID: 3190935731022219854}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: fd473e168f536e64a95feecebfc5c24d, type: 3}
+--- !u!114 &3190935731022219854 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3360243544356762369, guid: fd473e168f536e64a95feecebfc5c24d, type: 3}
+  m_PrefabInstance: {fileID: 3190935731022219853}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
