@@ -19,7 +19,4 @@ To build, open in Unity version 2020.1.0.f1 (Available: https://unity3d.com/get-
 - Buttons can turn on/off objects
 - Spawners can turn on/off objects (For wave based mechanics.)
 ### Current Bugs
-- Dog can push enemies out of bounds.
-- Player can infinitelty jump.
 - Petting interuptions can cause endless while loops.
-- Spawn points don't activate correctly.
